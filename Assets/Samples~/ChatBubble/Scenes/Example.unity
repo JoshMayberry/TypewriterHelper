@@ -242,6 +242,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb723ad99e3c79041b6540de8b5027c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  EventInteract:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &648888820
 Transform:
   m_ObjectHideFlags: 0
@@ -331,6 +334,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d0c17a3b9f65ef4593cbf169ec98cbd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  chatBubbleSprite: []
+  chatButtonSprite: []
+  chatBubblePrefab: {fileID: 0}
+  activeChatBubbles: []
+  inactiveChatBubbles: []
 --- !u!1 &1028713357
 GameObject:
   m_ObjectHideFlags: 0

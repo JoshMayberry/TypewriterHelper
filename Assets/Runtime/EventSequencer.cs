@@ -37,6 +37,7 @@ namespace Aarthificial.Typewriter.Applications {
 			this.activeDialogueSequences = new List<DialogueSequence>();
 			this.inactiveDialogueSequences = new List<DialogueSequence>();
 		}
+
 		private void OnEnable() {
 			TypewriterDatabase.Instance.AddListener(this.HandleTypewriterEvent);
 		}

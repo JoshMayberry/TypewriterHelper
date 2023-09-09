@@ -1,10 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using Aarthificial.Typewriter.References;
-using Aarthificial.Typewriter.Tools;
 using Aarthificial.Typewriter.Entries;
-using Aarthificial.Typewriter.Editor.Common;
 
 namespace Aarthificial.Typewriter.Applications {
     public enum SequenceType {
@@ -15,7 +12,7 @@ namespace Aarthificial.Typewriter.Applications {
         DialogueArray
     }
 
-    public class DialogueSequence {
+    public abstract class DialogueSequenceBase {
         private Speaker currentSpeaker;
         private Context currentContext;
         private EventEntry currentEvent;
@@ -23,12 +20,15 @@ namespace Aarthificial.Typewriter.Applications {
         private RuleEntry currentRule;
         private DialogueArrayEntry latestDialogueArrayEntry;
 
+        private UnityEvent _EventInteract;
+
         [Readonly] public SequenceType currentType;
         [Readonly] [SerializeField] private ChatBubble currentChatBubble;
         [Readonly] [SerializeField] private int nextDialogueArrayIndex;
 
-        internal DialogueSequence() {
+        internal DialogueSequenceBase() {
             this.currentType = SequenceType.Unknown;
+            this._EventInteract = this.GetEventInteract();
         }
 
         internal void SetEvent(EventEntry entry, ChatBubble chatBubble) {
@@ -60,15 +60,15 @@ namespace Aarthificial.Typewriter.Applications {
         internal void Cancel() {
             this.currentType = SequenceType.Canceled;
 
-            InputManager.instance.EventInteract.RemoveListener(this.Cancel);
+            this._EventInteract.RemoveListener(this.Cancel);
         }
 
         internal void Finish() {
-            InputManager.instance.EventInteract.AddListener(this.NextDialogue);
+            this._EventInteract.AddListener(this.NextDialogue);
         }
 
         internal void NextDialogue() {
-            InputManager.instance.EventInteract.RemoveListener(this.NextDialogue);
+            this._EventInteract.RemoveListener(this.NextDialogue);
         }
 
         internal void NextDialogueArrayLine() {
@@ -84,5 +84,7 @@ namespace Aarthificial.Typewriter.Applications {
 
             this.nextDialogueArrayIndex++;
         }
+
+        internal abstract UnityEvent GetEventInteract();
     }
 }

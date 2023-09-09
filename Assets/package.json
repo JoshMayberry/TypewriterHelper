@@ -1,0 +1,26 @@
+{
+  "name": "com.jmayberry.typewriterhelper",
+  "displayName": "Typewriter Helper",
+  "version": "1.0.0",
+  "unity": "2021.1",
+  "description": "A helper library for helping with Typewriter.",
+  "keywords": [
+    "typewriter",
+    "dialogue-systems",
+    "utility"
+  ],
+  "dependencies": {
+    "com.aarthificial.typewriter": "1.2.0",
+  },
+  "author": {
+    "name": "jmayberry",
+    "email": "joshua.mayberry1991@gmail.com"
+  },
+  "samples": [
+    {
+      "displayName": "ChatBubble",
+      "description": "How to do chat bubbles.",
+      "path": "Samples~/ChatBubble"
+    }
+  ],
+}
