@@ -12,96 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33d0878fa1be1f546a2a65661326a877, type: 3}
   m_Name: Common
   m_EditorClassIdentifier: 
-  TableName: Common
+  TableName: 
   Rules: []
-  Facts:
-  - rid: 669309198247395332
-  - rid: 669309198247395333
-  - rid: 669309198247395334
-  - rid: 669309198247395335
-  - rid: 669309198247395336
-  - rid: 669309198247395337
+  Facts: []
   Events: []
   references:
     version: 2
-    RefIds:
-    - rid: 669309198247395332
-      type: {class: ScopeEntry, ns: Aarthificial.Typewriter.Entries, asm: Aarthificial.Typewriter}
-      data:
-        ID: 303301
-        Key: global
-        Scope:
-          InternalID: 0
-        Triggers:
-          List: []
-        Once: 0
-        Padding: 0
-        Criteria: []
-        Modifications: []
-    - rid: 669309198247395333
-      type: {class: ScopeEntry, ns: Aarthificial.Typewriter.Entries, asm: Aarthificial.Typewriter}
-      data:
-        ID: 303302
-        Key: area
-        Scope:
-          InternalID: 0
-        Triggers:
-          List: []
-        Once: 0
-        Padding: 0
-        Criteria: []
-        Modifications: []
-    - rid: 669309198247395334
-      type: {class: ScopeEntry, ns: Aarthificial.Typewriter.Entries, asm: Aarthificial.Typewriter}
-      data:
-        ID: 303303
-        Key: scene
-        Scope:
-          InternalID: 0
-        Triggers:
-          List: []
-        Once: 0
-        Padding: 0
-        Criteria: []
-        Modifications: []
-    - rid: 669309198247395335
-      type: {class: ScopeEntry, ns: Aarthificial.Typewriter.Entries, asm: Aarthificial.Typewriter}
-      data:
-        ID: 303304
-        Key: temp
-        Scope:
-          InternalID: 0
-        Triggers:
-          List: []
-        Once: 0
-        Padding: 0
-        Criteria: []
-        Modifications: []
-    - rid: 669309198247395336
-      type: {class: SpeakerEntry, ns: , asm: Assembly-CSharp}
-      data:
-        ID: 303305
-        Key: player
-        Scope:
-          InternalID: 0
-        Triggers:
-          List: []
-        Once: 0
-        Padding: 0
-        Criteria: []
-        Modifications: []
-        DisplayName: 
-    - rid: 669309198247395337
-      type: {class: SpeakerEntry, ns: , asm: Assembly-CSharp}
-      data:
-        ID: 303306
-        Key: system
-        Scope:
-          InternalID: 0
-        Triggers:
-          List: []
-        Once: 0
-        Padding: 0
-        Criteria: []
-        Modifications: []
-        DisplayName: 
+    RefIds: []

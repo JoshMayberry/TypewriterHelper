@@ -1,17 +1,18 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 using Aarthificial.Typewriter.References;
 using Aarthificial.Typewriter.Tools;
 using Aarthificial.Typewriter.Entries;
+using Aarthificial.Typewriter;
+using jmayberry.TypewriterHelper.Entries;
 
 /**
  * This is in charge of catching events and deciding if they should interrupt the current sequence.
  * 
  * Events start a new sequence; rules are clips that belong to the current sequence.
  */
-namespace Aarthificial.Typewriter.Applications {
-	public class EventSequencer : MonoBehaviour {
+namespace jmayberry.TypewriterHelper.Applications {
+        public class EventSequencer : MonoBehaviour {
         [Required][SerializeField] internal Sprite[] chatBubbleSprite;
         [Required][SerializeField] internal Sprite[] chatButtonSprite;
         [Required][SerializeField] internal ChatBubble chatBubblePrefab;

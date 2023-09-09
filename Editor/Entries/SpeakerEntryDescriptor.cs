@@ -1,4 +1,7 @@
-﻿namespace Aarthificial.Typewriter.Editor.Descriptors {
+﻿using Aarthificial.Typewriter.Editor.Descriptors;
+using jmayberry.TypewriterHelper.Entries;
+
+namespace jmayberry.TypewriterHelper.Editor.Descriptors {
     /// <summary>
     /// A descriptor for <see cref="SpeakerEntry"/>.
     /// </summary>

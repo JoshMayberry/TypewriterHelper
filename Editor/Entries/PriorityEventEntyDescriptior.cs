@@ -1,6 +1,7 @@
-using Aarthificial.Typewriter.Entries;
+using Aarthificial.Typewriter.Editor.Descriptors;
+using jmayberry.TypewriterHelper.Entries;
 
-namespace Aarthificial.Typewriter.Editor.Descriptors {
+namespace jmayberry.TypewriterHelper.Editor.Descriptors {
     [CustomEntryDescriptor(typeof(PriorityEventEntry))]
     public class PriorityEventEntryDescriptor : EventEntryDescriptor {
         public override string Name => "Priority Event";

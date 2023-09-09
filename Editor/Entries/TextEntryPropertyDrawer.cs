@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
-using Aarthificial.Typewriter.Entries;
+using jmayberry.TypewriterHelper.Entries;
 
 namespace Aarthificial.Typewriter.Editor.PropertyDrawers {
     /// <summary>

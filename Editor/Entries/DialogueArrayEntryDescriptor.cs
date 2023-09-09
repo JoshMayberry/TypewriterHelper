@@ -1,6 +1,7 @@
-﻿using Aarthificial.Typewriter.Entries;
+﻿using Aarthificial.Typewriter.Editor.Descriptors;
+using jmayberry.TypewriterHelper.Entries;
 
-namespace Aarthificial.Typewriter.Editor.Descriptors {
+namespace jmayberry.TypewriterHelper.Editor.Descriptors {
         [CustomEntryDescriptor(typeof(DialogueArrayEntry))]
     public class DialogueArrayEntryDescriptor : RuleEntryDescriptor {
         public override string Name => "Dialogue Array";

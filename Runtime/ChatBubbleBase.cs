@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using TMPro;
 
-namespace Aarthificial.Typewriter.Applications {
+namespace jmayberry.TypewriterHelper.Applications {
 	public enum ChatBubbleAlignment {
 		TopLeft,
 		TopMiddle,

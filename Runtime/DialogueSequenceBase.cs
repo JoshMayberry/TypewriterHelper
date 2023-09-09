@@ -2,9 +2,10 @@ using UnityEngine;
 using UnityEngine.Events;
 using Aarthificial.Typewriter.References;
 using Aarthificial.Typewriter.Entries;
+using jmayberry.TypewriterHelper.Entries;
 
-namespace Aarthificial.Typewriter.Applications {
-    public enum SequenceType {
+namespace jmayberry.TypewriterHelper.Applications {
+        public enum SequenceType {
         Unknown,
         Canceled,
         Completed,

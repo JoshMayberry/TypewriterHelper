@@ -1,8 +1,8 @@
 using UnityEngine;
 using Aarthificial.Typewriter.References;
 
-namespace Aarthificial.Typewriter.Applications {
-	public enum SpeakerType {
+namespace jmayberry.TypewriterHelper.Applications {
+        public enum SpeakerType {
 		Skeleton = 0,
 		Slime = 1,
 		System = 2
