@@ -1,11 +1,11 @@
-﻿using Aarthificial.Typewriter.Editor.PropertyDrawers;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
+using Aarthificial.Typewriter.Entries;
 
-namespace Aarthificial.Typewriter.Entries {
+namespace Aarthificial.Typewriter.Editor.PropertyDrawers {
     /// <summary>
     /// A property drawer for <see cref="DialogueEntry"/>.
     /// </summary>
