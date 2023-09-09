@@ -10,8 +10,10 @@
 		"utility"
 	],
 	"dependencies": {
-		"com.aarthificial.typewriter": "1.2.0"
+		"com.aarthificial.typewriter": "1.2.0",
+		"com.unity.textmeshpro": "3.0.6"
 	},
+	"references": ["com.unity.textmeshpro"],
 	"author": {
 		"name": "jmayberry",
 		"email": "joshua.mayberry1991@gmail.com"

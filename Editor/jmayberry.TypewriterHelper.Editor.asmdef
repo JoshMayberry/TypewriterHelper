@@ -1,0 +1,20 @@
+{
+    "name": "jmayberry.TypewriterHelper.Editor",
+    "rootNamespace": "jmayberry.TypewriterHelper.Editor",
+    "references": [
+        "jmayberry.TypewriterHelper",
+        "Aarthificial.Typewriter.Editor",
+        "jmayberry.CustomAttributes"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

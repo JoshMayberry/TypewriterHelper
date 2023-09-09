@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25f92b86a913f784c9872905d5355435, type: 3}
   m_Name: TypewriterDatabase
   m_EditorClassIdentifier: 
-  Tables: []
+  Tables:
+  - {fileID: 11400000, guid: 9079852e4e4738a42a6daba48a6bf948, type: 2}

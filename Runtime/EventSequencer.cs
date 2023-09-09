@@ -5,6 +5,8 @@ using Aarthificial.Typewriter.Tools;
 using Aarthificial.Typewriter.Entries;
 using Aarthificial.Typewriter;
 using jmayberry.TypewriterHelper.Entries;
+using jmayberry.CustomAttributes;
+using UnityEngine.Events;
 
 /**
  * This is in charge of catching events and deciding if they should interrupt the current sequence.
@@ -12,7 +14,7 @@ using jmayberry.TypewriterHelper.Entries;
  * Events start a new sequence; rules are clips that belong to the current sequence.
  */
 namespace jmayberry.TypewriterHelper.Applications {
-        public class EventSequencer : MonoBehaviour {
+    public class EventSequencer : MonoBehaviour {
         [Required][SerializeField] internal Sprite[] chatBubbleSprite;
         [Required][SerializeField] internal Sprite[] chatButtonSprite;
         [Required][SerializeField] internal ChatBubble chatBubblePrefab;
@@ -20,7 +22,10 @@ namespace jmayberry.TypewriterHelper.Applications {
         private TypewriterWatcher typewriterWatcher;
 		private DialogueSequence currentSequence;
 
-		[SerializeField] internal Dictionary<int, Speaker> speakerLookup;
+        private static UnitySpawner<ChatBubble> chatBubbleSpawner;
+        private static CodeSpawner<DialogueSequence> dialogueSequeneceSpawner;
+
+		[SerializeField] internal static Dictionary<int, Speaker> speakerLookup;
 		[Readonly][SerializeField] private List<DialogueSequence> activeDialogueSequences;
 		[Readonly][SerializeField] private List<DialogueSequence> inactiveDialogueSequences;
         [Readonly][SerializeField] private List<ChatBubble> activeChatBubbles;
@@ -32,12 +37,12 @@ namespace jmayberry.TypewriterHelper.Applications {
 				Debug.LogError("Found more than one Dialogue Sequencer in the scene.");
 			}
 
-			instance = this;
+            EventSequencer.instance = this;
+            EventSequencer.speakerLookup = new Dictionary<int, Speaker>();
+            EventSequencer.chatBubbleSpawner = new UnitySpawner<ChatBubble>(this.chatBubblePrefab);
+            EventSequencer.dialogueSequeneceSpawner = new CodeSpawner<DialogueSequence>();
 
-			this.speakerLookup = new Dictionary<int, Speaker>();
-			this.activeDialogueSequences = new List<DialogueSequence>();
-			this.inactiveDialogueSequences = new List<DialogueSequence>();
-		}
+        }
 
 		private void OnEnable() {
 			TypewriterDatabase.Instance.AddListener(this.HandleTypewriterEvent);
@@ -71,52 +76,26 @@ namespace jmayberry.TypewriterHelper.Applications {
 		}
 
         public Speaker LookupSpeaker(DialogueEntry currentEntry) {
-            return this.speakerLookup[currentEntry.Speaker.ID];
+            return EventSequencer.speakerLookup[currentEntry.Speaker.ID];
         }
         public Speaker LookupSpeaker(DialogueArrayEntryLine currentEntry) {
-            return this.speakerLookup[currentEntry.Speaker.ID];
+            return EventSequencer.speakerLookup[currentEntry.Speaker.ID];
         }
 
         internal DialogueSequence SpawnDialogueSequence() {
-			DialogueSequence dialogueSequence;
-
-			// Try to reuse an inactive dialogueSequence, or create a new one
-			if (this.inactiveDialogueSequences.Count > 0) {
-				dialogueSequence = this.inactiveDialogueSequences[this.inactiveDialogueSequences.Count - 1];
-				this.inactiveDialogueSequences.RemoveAt(this.inactiveDialogueSequences.Count - 1);
-				this.activeDialogueSequences.Add(dialogueSequence);
-			}
-			else {
-				dialogueSequence = new DialogueSequence();
-			}
-
-			return dialogueSequence;
+			return EventSequencer.dialogueSequeneceSpawner.Spawn();
 		}
 
 		internal void DespawnDialogueSequence(DialogueSequence dialogueSequence) {
-			this.activeDialogueSequences.Remove(dialogueSequence);
-			this.inactiveDialogueSequences.Add(dialogueSequence);
+			EventSequencer.dialogueSequeneceSpawner.Despawn(dialogueSequence);
         }
 
         internal ChatBubble SpawnChatBubble() {
-            ChatBubble chatBubble;
-
-            // Try to reuse an inactive chatBubble, or create a new one
-            if (this.inactiveChatBubbles.Count > 0) {
-                chatBubble = this.inactiveChatBubbles[this.inactiveChatBubbles.Count - 1];
-                this.inactiveChatBubbles.RemoveAt(this.inactiveChatBubbles.Count - 1);
-                this.activeChatBubbles.Add(chatBubble);
-            }
-            else {
-                chatBubble = Instantiate(this.chatBubblePrefab, this.transform.position, this.transform.rotation);
-            }
-
-            return chatBubble;
+			return EventSequencer.chatBubbleSpawner.Spawn();
         }
 
-        internal void DespawnChatBubble(ChatBubble dialogueSequence) {
-            this.activeChatBubbles.Remove(dialogueSequence);
-            this.inactiveChatBubbles.Add(dialogueSequence);
+        internal void DespawnChatBubble(ChatBubble chatBubble) {
+			EventSequencer.chatBubbleSpawner.Despawn(chatBubble);
         }
 
         internal void HandleTypewriterEvent(BaseEntry entry, ITypewriterContext iContext) {
@@ -154,5 +133,5 @@ namespace jmayberry.TypewriterHelper.Applications {
 
             throw new System.Exception("Unknown entry type for '" + entry + "'");
 		}
-	}
+    }
 }

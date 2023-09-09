@@ -12,10 +12,96 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33d0878fa1be1f546a2a65661326a877, type: 3}
   m_Name: Common
   m_EditorClassIdentifier: 
-  TableName: 
+  TableName: Common
   Rules: []
-  Facts: []
+  Facts:
+  - rid: 669309235197116417
+  - rid: 669309235197116418
+  - rid: 669309235197116419
+  - rid: 669309235197116420
+  - rid: 669309235197116421
+  - rid: 669309235197116422
   Events: []
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 669309235197116417
+      type: {class: ScopeEntry, ns: Aarthificial.Typewriter.Entries, asm: Aarthificial.Typewriter}
+      data:
+        ID: 303311
+        Key: global
+        Scope:
+          InternalID: 0
+        Triggers:
+          List: []
+        Once: 0
+        Padding: 0
+        Criteria: []
+        Modifications: []
+    - rid: 669309235197116418
+      type: {class: ScopeEntry, ns: Aarthificial.Typewriter.Entries, asm: Aarthificial.Typewriter}
+      data:
+        ID: 303312
+        Key: area
+        Scope:
+          InternalID: 0
+        Triggers:
+          List: []
+        Once: 0
+        Padding: 0
+        Criteria: []
+        Modifications: []
+    - rid: 669309235197116419
+      type: {class: ScopeEntry, ns: Aarthificial.Typewriter.Entries, asm: Aarthificial.Typewriter}
+      data:
+        ID: 303313
+        Key: scene
+        Scope:
+          InternalID: 0
+        Triggers:
+          List: []
+        Once: 0
+        Padding: 0
+        Criteria: []
+        Modifications: []
+    - rid: 669309235197116420
+      type: {class: ScopeEntry, ns: Aarthificial.Typewriter.Entries, asm: Aarthificial.Typewriter}
+      data:
+        ID: 303314
+        Key: temp
+        Scope:
+          InternalID: 0
+        Triggers:
+          List: []
+        Once: 0
+        Padding: 0
+        Criteria: []
+        Modifications: []
+    - rid: 669309235197116421
+      type: {class: SpeakerEntry, ns: jmayberry.TypewriterHelper.Entries, asm: Assembly-CSharp}
+      data:
+        ID: 303315
+        Key: system
+        Scope:
+          InternalID: 0
+        Triggers:
+          List: []
+        Once: 0
+        Padding: 0
+        Criteria: []
+        Modifications: []
+        DisplayName: 
+    - rid: 669309235197116422
+      type: {class: SpeakerEntry, ns: jmayberry.TypewriterHelper.Entries, asm: Assembly-CSharp}
+      data:
+        ID: 303316
+        Key: player
+        Scope:
+          InternalID: 0
+        Triggers:
+          List: []
+        Once: 0
+        Padding: 0
+        Criteria: []
+        Modifications: []
+        DisplayName: 

@@ -3,9 +3,10 @@ using UnityEngine.Events;
 using Aarthificial.Typewriter.References;
 using Aarthificial.Typewriter.Entries;
 using jmayberry.TypewriterHelper.Entries;
+using jmayberry.CustomAttributes;
 
 namespace jmayberry.TypewriterHelper.Applications {
-        public enum SequenceType {
+    public enum SequenceType {
         Unknown,
         Canceled,
         Completed,
@@ -13,7 +14,7 @@ namespace jmayberry.TypewriterHelper.Applications {
         DialogueArray
     }
 
-    public abstract class DialogueSequenceBase {
+    public class DialogueSequence {
         private Speaker currentSpeaker;
         private Context currentContext;
         private EventEntry currentEvent;
@@ -21,15 +22,14 @@ namespace jmayberry.TypewriterHelper.Applications {
         private RuleEntry currentRule;
         private DialogueArrayEntry latestDialogueArrayEntry;
 
-        private UnityEvent _EventInteract;
+        [SerializeField] private IInputs inputMapper;
 
         [Readonly] public SequenceType currentType;
         [Readonly] [SerializeField] private ChatBubble currentChatBubble;
         [Readonly] [SerializeField] private int nextDialogueArrayIndex;
 
-        internal DialogueSequenceBase() {
+        public DialogueSequence() {
             this.currentType = SequenceType.Unknown;
-            this._EventInteract = this.GetEventInteract();
         }
 
         internal void SetEvent(EventEntry entry, ChatBubble chatBubble) {
@@ -61,15 +61,15 @@ namespace jmayberry.TypewriterHelper.Applications {
         internal void Cancel() {
             this.currentType = SequenceType.Canceled;
 
-            this._EventInteract.RemoveListener(this.Cancel);
+            this.inputMapper.EventInteract.RemoveListener(this.Cancel);
         }
 
         internal void Finish() {
-            this._EventInteract.AddListener(this.NextDialogue);
+            this.inputMapper.EventInteract.AddListener(this.NextDialogue);
         }
 
         internal void NextDialogue() {
-            this._EventInteract.RemoveListener(this.NextDialogue);
+            this.inputMapper.EventInteract.RemoveListener(this.NextDialogue);
         }
 
         internal void NextDialogueArrayLine() {
@@ -85,7 +85,5 @@ namespace jmayberry.TypewriterHelper.Applications {
 
             this.nextDialogueArrayIndex++;
         }
-
-        internal abstract UnityEvent GetEventInteract();
     }
 }

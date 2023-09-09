@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 using TMPro;
+using jmayberry.CustomAttributes;
 
 namespace jmayberry.TypewriterHelper.Applications {
 	public enum ChatBubbleAlignment {
@@ -15,10 +16,10 @@ namespace jmayberry.TypewriterHelper.Applications {
 		Center
 	}
 
-	public abstract class ChatBubbleBase : MonoBehaviour {
+	public class ChatBubble : MonoBehaviour {
 		[SerializeField] internal UnityEvent EventFinished;
 		[SerializeField] internal UnityEvent EventEnded;
-        internal UnityEvent _EventInteract;
+        [SerializeField] private IInputs inputMapper;
 
         [SerializeField] private SpriteRenderer iconSpriteRenderer;
 		[SerializeField] private SpriteRenderer backgroundSpriteRenderer;
@@ -40,7 +41,7 @@ namespace jmayberry.TypewriterHelper.Applications {
 			this.gameObject.SetActive(false);
 		}
 
-		private void Update() {
+        private void Update() {
 			if (!this.isTextCompleted) {
 				return;
 			}
@@ -148,7 +149,7 @@ namespace jmayberry.TypewriterHelper.Applications {
 			this.isTextCompleted = false;
 
 			if (this.canSkipToEnd) {
-				InputManager.instance.EventInteract.AddListener(this.SkipToEnd);
+                this.inputMapper.EventInteract.AddListener(this.SkipToEnd);
 			}
 		}
 
@@ -157,20 +158,18 @@ namespace jmayberry.TypewriterHelper.Applications {
 		}
 
 		internal void FinishText() {
-			InputManager.instance.EventInteract.RemoveListener(this.SkipToEnd);
-			InputManager.instance.EventInteract.AddListener(this.End);
+			this.inputMapper.EventInteract.RemoveListener(this.SkipToEnd);
+			this.inputMapper.EventInteract.AddListener(this.End);
 			this.isTextCompleted = true;
 			this.SetContents(this.text);
 			this.EventFinished.Invoke();
 		}
 
 		internal void End() {
-			InputManager.instance.EventInteract.RemoveListener(this.SkipToEnd);
+			this.inputMapper.EventInteract.RemoveListener(this.SkipToEnd);
 			this.isTextCompleted = true;
 			this.gameObject.SetActive(false);
 			this.EventEnded.Invoke();
 		}
-
-        internal abstract UnityEvent GetEventInteract();
     }
 }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using Aarthificial.Typewriter.References;
+using jmayberry.CustomAttributes;
 
 namespace jmayberry.TypewriterHelper.Applications {
         public enum SpeakerType {
@@ -24,14 +25,14 @@ namespace jmayberry.TypewriterHelper.Applications {
 			if (this.speakerReference == 0) {
 				return;
 			}
-			EventSequencer.instance.speakerLookup.Add(this.speakerReference.ID, this);
+			EventSequencer.speakerLookup.Add(this.speakerReference.ID, this);
 		}
 
 		void OnDisable() {
 			if (this.speakerReference == 0) {
 				return;
 			}
-			EventSequencer.instance.speakerLookup.Remove(this.speakerReference.ID);
+			EventSequencer.speakerLookup.Remove(this.speakerReference.ID);
 		}
 	}
 }
