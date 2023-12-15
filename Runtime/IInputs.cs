@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace jmayberry.TypewriterHelper
-{
+namespace jmayberry.TypewriterHelper {
 	public interface IInputs {
 		UnityEvent EventInteract { get; }
 	}
