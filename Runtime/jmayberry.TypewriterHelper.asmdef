@@ -4,7 +4,10 @@
     "references": [
         "Aarthificial.Typewriter",
         "jmayberry.CustomAttributes",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "jmayberry.Spawner",
+        "AYellowpaper.SerializedCollections",
+        "jmayberry.EventSequencer"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
