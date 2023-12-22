@@ -9,8 +9,6 @@ namespace jmayberry.TypewriterHelper {
 
 	}
 
-
-
 	public class Speaker<SpeakerType> : MonoBehaviour, ISpeaker where SpeakerType : Enum {
 		[Header("Speaker")]
 		[Required][SerializeField] internal Transform chatBubblePosition;
@@ -21,20 +19,20 @@ namespace jmayberry.TypewriterHelper {
 
 		[SerializeField] internal string displayName;
 
-		internal Context typewriterContext = new Context();
+		internal DialogContext typewriterContext = new DialogContext();
 
-		void OnEnable() {
-			if (this.speakerReference == 0) {
-				return;
-			}
-			DialogManager<SpeakerType>.instance.speakerLookup.Add(this.speakerReference.ID, this);
-		}
+		//void OnEnable() {
+		//	if (this.speakerReference == 0) {
+		//		return;
+		//	}
+		//	DialogManagerBase.instance.speakerLookup.Add(this.speakerReference.ID, this);
+		//}
 
-		void OnDisable() {
-			if (this.speakerReference == 0) {
-				return;
-			}
-			DialogManager<SpeakerType>.instance.speakerLookup.Remove(this.speakerReference.ID);
-		}
+		//void OnDisable() {
+		//	if (this.speakerReference == 0) {
+		//		return;
+		//	}
+		//	DialogManagerBase.instance.speakerLookup.Remove(this.speakerReference.ID);
+		//}
 	}
 }

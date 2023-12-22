@@ -11,7 +11,7 @@ namespace jmayberry.TypewriterHelper.Editor.Descriptors {
     ///
     /// In this simple example we change the name of the entry to "Dialogue".
     /// </remarks>
-    [CustomEntryDescriptor(typeof(DialogueEntry))]
+    [CustomEntryDescriptor(typeof(DialogEntry))]
     public class TextEntryDescriptor : RuleEntryDescriptor {
         public override string Name => "Dialogue";
     }

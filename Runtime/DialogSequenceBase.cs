@@ -15,26 +15,28 @@ using jmayberry.EventSequencer;
 using jmayberry.Spawner;
 
 namespace jmayberry.TypewriterHelper {
-    public abstract class DialogueSequenceBase<SpeakerType> : EventSequenceBase, ISpeaker where SpeakerType : Enum {
+    public class DialogSequenceBase : EventSequenceBase {
         [Header("Typewriter")]
         public EventEntry rootEventEntry;
-        [Readonly] public Speaker<SpeakerType> currentSpeaker;
+        [Readonly] public ISpeaker currentSpeaker;
 
+        [Required] public DialogContext defaultContext;
         [Readonly] public DialogContext currentContext;
         [Readonly] public ChatBubbleBase currentChatBubble;
         [Readonly] public DialogEventHandler dialogEventHandler;
 
-        public DialogueSequenceBase() : base() {
+        public DialogSequenceBase() : base() {
             this.dialogEventHandler = new DialogEventHandler();
         }
 
-        public DialogueSequenceBase(EventEntry eventEntry) : base() {
+        public DialogSequenceBase(EventEntry eventEntry) : base() {
             this.dialogEventHandler = new DialogEventHandler();
             this.SetEventEntry(eventEntry);
         }
 
         public void SetEventEntry(EventEntry eventEntry) {
             this.rootEventEntry = eventEntry;
+            this.dialogEventHandler.entry = this.rootEventEntry;
         }
 
         public DialogContext GetContext() {
@@ -42,7 +44,7 @@ namespace jmayberry.TypewriterHelper {
                 return this.currentContext;
             }
 
-            return DialogManagerBase<SpeakerType>.defaultContext;
+            return this.defaultContext;
         }
 
         public override bool HasAnotherEvent() {
@@ -53,19 +55,22 @@ namespace jmayberry.TypewriterHelper {
             return this.GetContext().WouldInvoke(this.dialogEventHandler.entry);
         }
 
+        public override EventPriority GetCurrentEventPriority() {
+            throw new System.NotImplementedException();
+        }
+
         public override IEnumerator Start(IContext iContext) {
             if (this.rootEventEntry == null) {
                 Debug.LogError("Root Entry not yet set");
                 yield break;
             }
 
-            this.dialogEventHandler.entry = this.rootEventEntry;
             yield return base.Start(iContext);
         }
 
         // These functions are here to make the application of the EventSequencer package work
         public override EventBase GetNextEvent() {
-            return this.currentEvent;
+            return this.dialogEventHandler;
         }
 
         public override void AddEvent(params EventBase[] events) {

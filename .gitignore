@@ -73,3 +73,7 @@ crashlytics-build.properties
 Packages/
 Samples~/General Infrastructure/1.0.0.meta
 Samples~/General Infrastructure/
+Data/Debug.asset
+Data/
+TextMesh Pro/
+TextMesh Pro.meta

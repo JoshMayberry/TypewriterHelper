@@ -12,7 +12,6 @@ using jmayberry.TypewriterHelper.Entries;
 using jmayberry.CustomAttributes;
 using jmayberry.EventSequencer;
 using jmayberry.Spawner;
-using static UnityEngine.GraphicsBuffer;
 
 namespace jmayberry.TypewriterHelper {
 
@@ -30,7 +29,7 @@ namespace jmayberry.TypewriterHelper {
 		[SerializedDictionary("Dialog Option", "Icon")] public SerializedDictionary<DialogOption, Sprite> iconSprite;
 	}
 
-	public class DialogManagerBase : EventManagerBase {
+	public abstract class DialogManagerBase<SpeakerType> : EventManagerBase where SpeakerType : Enum {
 		[Header("Setup")]
 		[SerializedDictionary("Speaker Type", "Chat Bubble")] public SerializedDictionary<SpeakerType, ChatBubbleInfo> chatBubbleInfo;
 		[Required][SerializeField] internal ChatBubbleBase chatBubblePrefab;
@@ -41,8 +40,7 @@ namespace jmayberry.TypewriterHelper {
 
         private TypewriterWatcher typewriterWatcher;
 		private static UnitySpawner<ChatBubbleBase> chatBubbleSpawner;
-        //internal CodeSpawner<DialogueSequenceBase<SpeakerType>> uiCardSpawner { get; private set; }
-        internal CodeSpawner<EventSequenceBase> uiCardSpawner { get; private set; }
+        private static CodeSpawner<DialogSequenceBase> dialogSequenceSpawner;
 
         public static DialogManagerBase<SpeakerType> instance { get; private set; }
 
@@ -56,7 +54,9 @@ namespace jmayberry.TypewriterHelper {
 			instance = this;
 
 			speakerLookup = new Dictionary<int, ISpeaker>();
-		}
+			chatBubbleSpawner = new UnitySpawner<ChatBubbleBase>();
+			dialogSequenceSpawner = new CodeSpawner<DialogSequenceBase>();
+        }
 		private void OnEnable() {
 			TypewriterDatabase.Instance.AddListener(this.HandleTypewriterEvent);
 		}
@@ -86,22 +86,78 @@ namespace jmayberry.TypewriterHelper {
 			if (!isSilent) {
 				TypewriterDatabase.Instance.MarkChange();
 			}
-		}
+        }
 
-		public ISpeaker LookupSpeaker(DialogEntry currentEntry) {
+        public ISpeaker LookupSpeaker(DialogEntry currentEntry) {
 			return speakerLookup[currentEntry.Speaker.ID];
-		}
+        }
 
-		internal ChatBubbleBase SpawnChatBubble() {
-			return chatBubbleSpawner.Spawn();
-		}
+        internal ChatBubbleBase SpawnChatBubble() {
+            return chatBubbleSpawner.Spawn();
+        }
 
-		internal void DespawnChatBubble(ChatBubbleBase chatBubble) {
-			chatBubbleSpawner.Despawn(chatBubble);
-		}
+        internal void DespawnChatBubble(ChatBubbleBase chatBubble) {
+            chatBubbleSpawner.Despawn(chatBubble);
+        }
 
-		internal void HandleTypewriterEvent(BaseEntry entry, ITypewriterContext iContext) {
-			
+        internal DialogSequenceBase SpawnDialogSequence(EventEntry eventEntry) {
+            DialogSequenceBase dialogSequence = dialogSequenceSpawner.Spawn();
+			dialogSequence.SetEventEntry(eventEntry);
+			dialogSequence.defaultContext = defaultContext;
+            return dialogSequence;
+        }
+
+        internal void DespawnDialogSequence(DialogSequenceBase dialogSequence) {
+            dialogSequenceSpawner.Despawn(dialogSequence);
+        }
+
+        public bool TrySequence(EntryReference eventReference) {
+            return this.TrySequence(defaultContext, eventReference);
+        }
+
+        public bool TrySequence(DialogContext dialogContext, EntryReference eventReference) {
+            eventReference.TryGetEntry(out EventEntry eventEntry);
+            return this.TrySequence(dialogContext, eventEntry);
+        }
+
+        public bool TrySequence(EventEntry eventEntry) {
+			return this.TrySequence(defaultContext, eventEntry);
+        }
+
+        public bool TrySequence(DialogContext dialogContext, EventEntry eventEntry) {
+            if (!dialogContext.WouldInvoke(eventEntry)) {
+                return false;
+            }
+
+            DialogSequenceBase dialogSequence = SpawnDialogSequence(eventEntry);
+            this.StartSequence(dialogContext, dialogSequence);
+            return true;
+        }
+
+        internal void HandleTypewriterEvent(BaseEntry entry, ITypewriterContext iContext) {
+			if (iContext is not DialogContext dialogContext) {
+				Debug.LogError($"Unknown context type {iContext}");
+				return;
+			}
+
+			// Facts are things that are true about the world
+			if (entry is FactEntry factEntry) {
+                dialogContext.TryInvoke(factEntry);
+				return;
+			}
+
+			// Rules are part of the current sequence
+			if (entry is RuleEntry triggerEntry) {
+                return;
+			}
+
+			// Events spawn a new sequence
+			if (entry is EventEntry eventEntry) {
+				Debug.Log($"@HandleTypewriterEvent.event.0; {eventEntry}");
+				this.TrySequence(dialogContext, eventEntry);
+            }
+
+            Debug.LogError($"Unknown entry type {entry}");
 		}
 	}
 }

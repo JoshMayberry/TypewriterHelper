@@ -11,39 +11,36 @@ using Aarthificial.Typewriter;
 
 namespace jmayberry.TypewriterHelper {
 	public class DialogEventHandler : EventBase {
+		[Readonly] public EventEntry spawnEvent;
+        [Readonly] public List<RuleEntry> dialogPieces;
 
-		[Readonly] public BaseEntry entry;
-
-		public DialogEventHandler() {}
+		public DialogEventHandler() {
+            this.dialogPieces = new List<RuleEntry>();
+        }
 
 		public override IEnumerator OnExecute(IContext iContext) {
-			if (iContext is not DialogContext dialogContext) {
-				Debug.LogError($"Unknown context type {iContext}");
-				yield break;
-			}
-
-			if (this.entry is FactEntry decisionEntry) {
-				dialogContext.TryInvoke(decisionEntry);
-				yield break;
-			}
-
-			if (this.entry is RuleEntry triggerEntry) {
-				dialogContext.TryInvoke(triggerEntry);
-				yield break;
-			}
-
-			if (this.entry is EventEntry eventEntry) {
-				if (!dialogContext.WouldInvoke(this.entry)) {
-					yield break;
-				}
-
-				dialogContext.Process(this.entry);
-				yield break;
+            if (iContext is not DialogContext dialogContext) {
+                Debug.LogError($"Unknown context type {iContext}");
+                yield break;
             }
 
-			Debug.LogError($"Unknown entry type {entry}");
+            Debug.Log($"@OnExecute; {this.entry}");
 
-			throw new System.Exception("Unknown entry type for '" + entry + "'");
-		}
-	}
+            yield return new WaitForSeconds(3);
+
+            dialogContext.Process(this.entry);
+
+            this.entry = null;
+
+        }
+
+        internal void HandleTypewriterEvent(BaseEntry entry, ITypewriterContext iContext) {
+
+
+
+            Debug.Log($"@HandleTypewriterEvent.Rule; {triggerEntry}");
+            dialogContext.TryInvoke(triggerEntry);
+
+        }
+    }
 }
