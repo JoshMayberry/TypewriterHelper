@@ -1,7 +1,8 @@
+using jmayberry.TypewriterHelper;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NPC : MonoBehaviour {
+public class NPC : Speaker<MySpeakerType> {
   
 }

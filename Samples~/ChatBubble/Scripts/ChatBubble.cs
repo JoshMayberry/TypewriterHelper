@@ -4,6 +4,6 @@ using UnityEngine;
 
 using jmayberry.TypewriterHelper;
 
-public class ChatBubble : ChatBubbleBase {
+public class ChatBubble : ChatBubbleBase<MySpeakerType> {
     
 }

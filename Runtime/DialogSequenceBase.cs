@@ -15,66 +15,140 @@ using jmayberry.EventSequencer;
 using jmayberry.Spawner;
 
 namespace jmayberry.TypewriterHelper {
-    public class DialogSequenceBase : EventSequenceBase {
-        [Header("Typewriter")]
-        public EventEntry rootEventEntry;
-        [Readonly] public ISpeaker currentSpeaker;
+	public class DialogSequenceBase<SpeakerType> : SequenceBase where SpeakerType : Enum {
+        [Header("Debug")]
+        [Readonly] public EventEntry rootEntry;
+        [Readonly] public ChatBubbleBase<SpeakerType> chatBubble;
+        [Readonly] public BaseEntry currentEntry;
+        [Readonly] public bool isStarted;
+        [Readonly] public bool isFinished;
+        [Readonly] public bool isContinue;
 
-        [Required] public DialogContext defaultContext;
-        [Readonly] public DialogContext currentContext;
-        [Readonly] public ChatBubbleBase currentChatBubble;
-        [Readonly] public DialogEventHandler dialogEventHandler;
+        public override string ToString() {
+			return $"<DialogSequenceBase:{this.GetHashCode()}>";
+		}
 
-        public DialogSequenceBase() : base() {
-            this.dialogEventHandler = new DialogEventHandler();
+		public DialogSequenceBase() : base() {
+		}
+
+		public void Reset() {
+			this.isStarted = false;
+			this.isContinue = false;
+			this.isFinished = false;
+
+			this.currentEntry = null;
         }
 
-        public DialogSequenceBase(EventEntry eventEntry) : base() {
-            this.dialogEventHandler = new DialogEventHandler();
-            this.SetEventEntry(eventEntry);
+        public override void OnSpawn(object spawner) {
+			this.CreateNewChatBubble();
+            base.OnSpawn(spawner);
         }
 
-        public void SetEventEntry(EventEntry eventEntry) {
-            this.rootEventEntry = eventEntry;
-            this.dialogEventHandler.entry = this.rootEventEntry;
+        public override void OnDespawn(object spawner) {
+			this.DoneWithChatBubble();
+            base.OnDespawn(spawner);
         }
 
-        public DialogContext GetContext() {
-            if (this.currentContext != null) {
-                return this.currentContext;
+        public bool CanStart() {
+			if (this.isStarted) {
+				Debug.LogError("Sequence has already started");
+				return false;
+			}
+
+			if (this.isFinished) {
+				Debug.LogError("Sequence has already finished");
+				return false;
+			}
+
+			if (this.rootEntry == null) {
+				Debug.LogError("Root Entry not yet set");
+				return false;
             }
 
-            return this.defaultContext;
-        }
-
-        public override bool HasAnotherEvent() {
-            if (this.dialogEventHandler.entry == null) {
+            if (this.chatBubble == null) {
+                Debug.LogError("Chat Bubble not yet set");
                 return false;
             }
 
-            return this.GetContext().WouldInvoke(this.dialogEventHandler.entry);
-        }
+            return true;
+		}
 
-        public override EventPriority GetCurrentEventPriority() {
-            throw new System.NotImplementedException();
-        }
-
+        // See: https://github.com/aarthificial-unity/foundations/blob/7d43e288317085920a55ea61c09bf30f3371b33c/Assets/Player/PlayerController.cs#L121-L138
         public override IEnumerator Start(IContext iContext) {
-            if (this.rootEventEntry == null) {
-                Debug.LogError("Root Entry not yet set");
-                yield break;
+			if (!this.CanStart()) {
+				yield break;
+			}
+
+			if (iContext is not DialogContext dialogContext) {
+				Debug.LogError($"Unknown context type {iContext}");
+				yield break;
+			}
+
+			this.isStarted = true;
+			TypewriterDatabase.Instance.AddListener(this.HandleTypewriterEvent);
+            dialogContext.Process(this.rootEntry);
+
+			BaseEntry previousEntry = this.rootEntry;
+			while (!this.isFinished) {
+				yield return new WaitUntil(() => previousEntry != this.currentEntry);
+
+				this.isContinue = false;
+				previousEntry = this.rootEntry;
+				yield return this.HandleCurrentEntry(dialogContext, this.currentEntry);
+
+
+                this.isContinue = true; // TODO: This should be set by an event handler
+                yield return new WaitUntil(() => this.isContinue || this.isFinished);
+			}
+
+            DialogManagerBase<SpeakerType>.dialogSequenceSpawner.Despawn(this);
+        }
+
+        private IEnumerator HandleCurrentEntry(DialogContext dialogContext, BaseEntry baseEntry) {
+            if (baseEntry is DialogEntry dialogEntry) {
+                yield return this.chatBubble.PopulateChatBubble(dialogContext, dialogEntry);
+            }
+            else {
+                Debug.LogError($"Unknown entry type {baseEntry}");
             }
 
-            yield return base.Start(iContext);
+            // Be finished with the entry
+            dialogContext.TryInvoke(baseEntry);
         }
 
-        // These functions are here to make the application of the EventSequencer package work
-        public override EventBase GetNextEvent() {
-            return this.dialogEventHandler;
+        internal void HandleTypewriterEvent(BaseEntry entry, ITypewriterContext iContext) {
+            if (iContext is not DialogContext dialogContext) {
+                Debug.LogError($"Unknown context type {iContext}");
+                return;
+            }
+
+            if (entry is RuleEntry ruleEntry) {
+                Debug.Log($"@Sequence.HandleTypewriterEvent.rule; {ruleEntry}");
+                // TODO: Check if this rule belongs to the currently held rule
+                this.currentEntry = ruleEntry;
+                return;
+            }
+
+            Debug.LogError($"Unknown entry type {entry}");
         }
 
-        public override void AddEvent(params EventBase[] events) {
-            Debug.LogWarning("AddEvent is unused");
+        //public override bool HasAnotherEvent() {
+        //    if (this.dialogEventHandler.entry == null) {
+        //        return false;
+        //    }
+
+        //    return this.GetContext().WouldInvoke(this.dialogEventHandler.entry);
+        //}
+
+
+        public override EventPriority GetCurrentEventPriority() {
+			throw new System.NotImplementedException();
+		}
+
+		public override IEnumerator OnCancel() {
+			this.isFinished = true;
+            DialogManagerBase<SpeakerType>.dialogSequenceSpawner.Despawn(this);
+			yield break;
         }
 
 
@@ -83,11 +157,16 @@ namespace jmayberry.TypewriterHelper {
 
 
 
+		// Chat bubble functions; override these to do things like a chat bubble history
+        protected virtual void CreateNewChatBubble() {
+            this.chatBubble = DialogManagerBase<SpeakerType>.chatBubbleSpawner.Spawn();
+            this.chatBubble.Hide();
+        }
 
-
-
-
-
+        protected virtual void DoneWithChatBubble() {
+            TypewriterDatabase.Instance.RemoveListener(this.HandleTypewriterEvent);
+            DialogManagerBase<SpeakerType>.chatBubbleSpawner.Despawn(this.chatBubble);
+        }
 
 
 

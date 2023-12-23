@@ -1,6 +1,7 @@
+using jmayberry.TypewriterHelper;
 using UnityEngine;
 
-public class Player : MonoBehaviour {
+public class Player : Speaker<MySpeakerType> {
     public float speed = 5.0f;
 
     void Update() {
