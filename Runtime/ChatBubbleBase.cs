@@ -26,29 +26,31 @@ namespace jmayberry.TypewriterHelper {
 	[Serializable]
 	public abstract class ChatBubbleBase<SpeakerType> : MonoBehaviour, ISpawnable where SpeakerType : Enum {
 		[Header("Setup")]
-		[Required] [SerializeField] protected TextMeshPro dialogText;
-		[Required] [SerializeField] protected TextMeshPro speakerText;
-		[Required] [SerializeField] protected SpriteRenderer iconSpriteRenderer;
-		[Required] [SerializeField] protected SpriteRenderer backgroundSpriteRenderer;
+		[Required][SerializeField] protected TextMeshPro dialogText;
+		[Required][SerializeField] protected TextMeshPro speakerText;
+		[Required][SerializeField] protected SpriteRenderer iconSpriteRenderer;
+		[Required][SerializeField] protected SpriteRenderer backgroundSpriteRenderer;
 		[Required][SerializeField] protected Transform container;
 
 		[Header("Tweak")]
-		[Required] [SerializeField] protected float updatesPerSecond = 10f;
-		[Required] [SerializeField] protected float charsPerSecond = 32f;
-		[Required] [SerializeField] protected Vector2 padding = new Vector2(2f, 2f);
-		[Required] [SerializeField] protected Vector2 minBackgroundSize = new Vector2(0.36f, 0.32f);
-		[Required] [SerializeField] protected string fallbackSpeakerName = "Disembodied Voice";
-		[Required] [SerializeField] protected bool growWithText = true;
+		[Required][SerializeField] protected float updatesPerSecond = 10f;
+		[Required][SerializeField] protected float charsPerSecond = 32f;
+		[Required][SerializeField] protected Vector2 padding = new Vector2(2f, 2f);
+		[Required][SerializeField] protected Vector2 speakerNameOffset = new Vector2(-2f, 0f);
+		[Required][SerializeField] protected Vector2 IconOffset = new Vector2(2f, 2f);
+		[Required][SerializeField] protected Vector2 minBackgroundSize = new Vector2(0.36f, 0.32f);
+		[Required][SerializeField] protected string fallbackSpeakerName = "Disembodied Voice";
+		[Required][SerializeField] protected bool growWithText = true;
 
 		[Header("Debug")]
-		[Readonly] [SerializeField] protected bool skipToEnd;
-		[Readonly] [SerializeField] protected internal float currentProgress;
-        [Readonly] [SerializeField] protected string currentText;
-        [Readonly] [SerializeField] protected Speaker<SpeakerType> currentSpeaker;
-		[Readonly] [SerializeField] protected DialogEntry currentEntry;
-		[Readonly] [SerializeField] protected DialogContext currentContext;
-		[Readonly] [SerializeField] protected ChatBubbleInfo chatBubbleInfo;
-		[Readonly] [SerializeField] protected DialogOption currentDialogOption;
+		[Readonly][SerializeField] protected bool skipToEnd;
+		[Readonly][SerializeField] protected internal float currentProgress;
+		[Readonly][SerializeField] protected string currentText;
+		[Readonly][SerializeField] protected internal Speaker<SpeakerType> currentSpeaker;
+		[Readonly][SerializeField] protected internal DialogEntry currentEntry;
+		[Readonly][SerializeField] protected internal DialogContext currentContext;
+		[Readonly][SerializeField] protected internal ChatBubbleInfo chatBubbleInfo;
+		[Readonly][SerializeField] protected DialogOption currentDialogOption;
 
 		public virtual void SoftReset(Transform newPosition = null) {
 			if (newPosition != null) {
@@ -66,6 +68,14 @@ namespace jmayberry.TypewriterHelper {
 			this.dialogText.gameObject.SetActive(false);
 		}
 
+		public virtual void OnSpawn(object spawner) {
+			DialogManagerBase<SpeakerType>.instance.EventUpdateBubblePosition.AddListener(this.UpdatePosition);
+		}
+
+		public virtual void OnDespawn(object spawner) {
+			DialogManagerBase<SpeakerType>.instance.EventUpdateBubblePosition.RemoveListener(this.UpdatePosition);
+		}
+
 		public virtual void Show() {
 			this.dialogText.gameObject.SetActive(true);
 			this.speakerText.gameObject.SetActive(true);
@@ -73,7 +83,7 @@ namespace jmayberry.TypewriterHelper {
 			this.backgroundSpriteRenderer.gameObject.SetActive(true);
 		}
 
-		public virtual void Hide(bool includeIcon=false) {
+		public virtual void Hide(bool includeIcon = false) {
 			if (includeIcon) {
 				this.iconSpriteRenderer.gameObject.SetActive(false);
 			}
@@ -83,7 +93,7 @@ namespace jmayberry.TypewriterHelper {
 			this.backgroundSpriteRenderer.gameObject.SetActive(false);
 		}
 
-		protected virtual bool UpdateSpeaker(Speaker<SpeakerType> newSpeaker=null) {
+		protected virtual bool UpdateSpeaker(Speaker<SpeakerType> newSpeaker = null) {
 			string speakerName = "";
 			if (newSpeaker == null) {
 				speakerName = this.currentEntry.Speaker.DisplayName;
@@ -130,6 +140,10 @@ namespace jmayberry.TypewriterHelper {
 		}
 
 		public virtual void UpdatePosition() {
+			if (this.currentSpeaker == null) {
+				return;
+			}
+
 			Vector2 upscaledSize = this.backgroundSpriteRenderer.size * this.backgroundSpriteRenderer.transform.localScale;
 
 			Vector2 newPosition = this.currentSpeaker.chatBubblePosition.position;
@@ -167,11 +181,11 @@ namespace jmayberry.TypewriterHelper {
 
 			// Move icon to bottom right corner
 			Vector2 iconSize = this.iconSpriteRenderer.size;
-			Vector2 iconPosition = (Vector2)this.container.transform.position + new Vector2(upscaledSize.x / 2 - iconSize.x / 2, -upscaledSize.y / 2 + iconSize.y / 2);
+			Vector2 iconPosition = (Vector2)this.container.transform.position + new Vector2(upscaledSize.x / 2 - iconSize.x / 2 + this.IconOffset.x, -upscaledSize.y / 2 + iconSize.y / 2 + this.IconOffset.y);
 			this.iconSpriteRenderer.transform.position = iconPosition;
 
 			// Move name to top left corner
-			Vector2 namePosition = (Vector2)this.container.transform.position + new Vector2(-upscaledSize.x / 2 + 1, upscaledSize.y / 2);
+			Vector2 namePosition = (Vector2)this.container.transform.position + new Vector2(-upscaledSize.x / 2 + 1 + this.speakerNameOffset.x, upscaledSize.y / 2 + this.speakerNameOffset.y);
 			this.speakerText.gameObject.transform.position = namePosition;
 		}
 
@@ -181,8 +195,8 @@ namespace jmayberry.TypewriterHelper {
 			if (this.growWithText) {
 				this.dialogText.text = this.currentText[..textLength];
 				this.dialogText.ForceMeshUpdate(); // Ensure text renders this frame so we can get the size
-            }
-            else {
+			}
+			else {
 				this.dialogText.maxVisibleCharacters = textLength;
 			}
 
@@ -206,20 +220,20 @@ namespace jmayberry.TypewriterHelper {
 
 			this.currentText = dialogEntry.Text;
 
-            if (this.growWithText) {
-                this.dialogText.text = "";
-                this.dialogText.maxVisibleCharacters = 99999;
-            }
-            else {
-                this.dialogText.text = this.currentText;
-                this.dialogText.ForceMeshUpdate(); // Ensure text renders this frame so we can get the size
-                this.dialogText.maxVisibleCharacters = 0;
-            }
+			if (this.growWithText) {
+				this.dialogText.text = "";
+				this.dialogText.maxVisibleCharacters = 99999;
+			}
+			else {
+				this.dialogText.text = this.currentText;
+				this.dialogText.ForceMeshUpdate(); // Ensure text renders this frame so we can get the size
+				this.dialogText.maxVisibleCharacters = 0;
+			}
 
 			this.Show();
 
 			this.skipToEnd = false;
-            float timeToWait = 1 / this.updatesPerSecond;
+			float timeToWait = 1 / this.updatesPerSecond;
 			this.currentProgress = 0;
 			float startTime = Time.time;
 			float duration = this.currentText.Length / (this.charsPerSecond * dialogEntry.Speed);
@@ -227,24 +241,32 @@ namespace jmayberry.TypewriterHelper {
 				if (this.skipToEnd) {
 					break;
 				}
-				
+
 				float timeElapsed = Time.time - startTime;
-                this.currentProgress = Mathf.Clamp01(timeElapsed / duration);
+				this.currentProgress = Mathf.Clamp01(timeElapsed / duration);
 				this.UpdateTextProgress(this.currentProgress);
 
 				yield return new WaitForSeconds(timeToWait);
 			}
 
 			this.currentProgress = 1;
-            this.UpdateTextProgress(1);
-        }
+			this.UpdateTextProgress(1);
+		}
 
 		public virtual void OnSkipToEnd() {
 			this.skipToEnd = true;
 		}
 
-		public virtual void OnSpawn(object spawner) { }
+		public virtual bool HasAnotherEvent() {
+			if (this.currentContext == null) {
+				return false;
+			}
 
-		public virtual void OnDespawn(object spawner) { }
+			if (this.currentEntry == null) {
+				return false;
+			}
+
+			return this.currentContext.HasMatchingRule(this.currentEntry.ID);
+		}
 	}
 }

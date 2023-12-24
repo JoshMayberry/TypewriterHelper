@@ -6,16 +6,16 @@ using jmayberry.Spawner;
 using jmayberry.TypewriterHelper;
 
 public enum MySpeakerType {
-    Unknown,
-    System,
-    Slime,
-    Skeleton,
+	Unknown,
+	System,
+	Slime,
+	Skeleton,
 }
 
 public class DialogManager : DialogManagerBase<MySpeakerType> {
-    private void Update() {
-        if (Input.GetKeyDown("space")) {
-            this.UserInteractedWithDialog.Invoke();
-        }
-    }
+	private void Update() {
+		if (Input.GetKeyDown("space")) {
+			this.EventUserInteractedWithDialog.Invoke();
+		}
+	}
 }

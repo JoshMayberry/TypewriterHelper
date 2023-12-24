@@ -21,9 +21,9 @@ namespace jmayberry.TypewriterHelper {
 		Unknown = 0,
 		Interact_Inactive = 101,
 		Interact_Active = 102,
-        StartDialog_Inactive = 151,
-        StartDialog_Active = 152,
-        NextEntry = 201,
+		StartDialog_Inactive = 151,
+		StartDialog_Active = 152,
+		NextEntry = 201,
 		SkipPopulate = 202,
 		Close = 301,
 		SelectOption = 401,
@@ -31,28 +31,38 @@ namespace jmayberry.TypewriterHelper {
 
 	[Serializable]
 	public class  ChatBubbleInfo {
-        [Required] public Sprite background;
-        [Required] public Sprite fallbackIconSprite;
-        [SerializedDictionary("Dialog Option", "Icon")] public SerializedDictionary<DialogOption, Sprite> iconSprite;
+		[Required] public Sprite background;
+		[Required] public Sprite fallbackIconSprite;
+		[SerializedDictionary("Dialog Option", "Icon")] public SerializedDictionary<DialogOption, Sprite> iconSprite;
 	}
 
 	public abstract class DialogManagerBase<SpeakerType> : EventManagerBase where SpeakerType : Enum {
 		[Header("Setup")]
 		[SerializedDictionary("Speaker Type", "Chat Bubble")] public SerializedDictionary<SpeakerType, ChatBubbleInfo> chatBubbleInfo = new SerializedDictionary<SpeakerType, ChatBubbleInfo>();
 		public ChatBubbleInfo fallbackChatBubbleInfo;
-        [Required] [SerializeField] private ChatBubbleBase<SpeakerType> chatBubblePrefab;
+		[Required] [SerializeField] private ChatBubbleBase<SpeakerType> chatBubblePrefab;
 		[EntryFilter(Variant = EntryVariant.Fact)] public EntryReference fallbackSpeakerReference;
 
-        [Header("For Debugging")]
+
+		[Header("Tweak")]
+		[SerializeField] protected float InteractionCooldown = 0.1f;
+		[Readonly][SerializeField] public float lastInteractionTime = 0f;
+		[SerializeField] protected float UpdatePositionCooldown = 0.1f;
+		[Readonly][SerializeField] public float lastUpdatePositionTime = 0f;
+
+		[Header("For Debugging")]
 		public static readonly DialogContext defaultContext = new DialogContext();
-        [SerializeField] internal static Dictionary<int, Speaker<SpeakerType>> speakerLookup;
+		[SerializeField] internal static Dictionary<int, Speaker<SpeakerType>> speakerLookup = new Dictionary<int, Speaker<SpeakerType>>();
 
-        protected TypewriterWatcher typewriterWatcher;
+		protected TypewriterWatcher typewriterWatcher;
 		protected internal static UnitySpawner<ChatBubbleBase<SpeakerType>> chatBubbleSpawner;
-        protected internal static CodeSpawner<DialogSequenceBase<SpeakerType>> dialogSequenceSpawner;
-        [Readonly] public UnityEvent UserInteractedWithDialog = new UnityEvent();
+		protected internal static CodeSpawner<DialogSequenceBase<SpeakerType>> dialogSequenceSpawner;
+		
+		[Header("Events")]
+		[Readonly] public UnityEvent EventUserInteractedWithDialog = new UnityEvent();
+		[Readonly] public UnityEvent EventUpdateBubblePosition = new UnityEvent();
 
-        public static DialogManagerBase<SpeakerType> instance { get; private set; }
+		public static DialogManagerBase<SpeakerType> instance { get; private set; }
 
 		private void Awake() {
 			if (instance != null && instance != this) {
@@ -63,10 +73,9 @@ namespace jmayberry.TypewriterHelper {
 
 			instance = this;
 
-			speakerLookup = new Dictionary<int, Speaker<SpeakerType>>();
 			chatBubbleSpawner = new UnitySpawner<ChatBubbleBase<SpeakerType>>(chatBubblePrefab);
 			dialogSequenceSpawner = new CodeSpawner<DialogSequenceBase<SpeakerType>>();
-        }
+		}
 
 		private void OnEnable() {
 			TypewriterDatabase.Instance.AddListener(this.HandleTypewriterEvent);
@@ -97,53 +106,57 @@ namespace jmayberry.TypewriterHelper {
 			if (!isSilent) {
 				TypewriterDatabase.Instance.MarkChange();
 			}
-        }
+		}
 
-        public Speaker<SpeakerType> LookupSpeaker(DialogEntry dialogEntry) {
+		public Speaker<SpeakerType> LookupSpeaker(DialogEntry dialogEntry) {
 			var speaker = speakerLookup.GetValueOrDefault(dialogEntry.Speaker.ID);
 			if (speaker == null) {
 				speaker = speakerLookup.GetValueOrDefault(this.fallbackSpeakerReference.ID);
-            }
+			}
 			return speaker;
-        }
+		}
 
-        public Speaker<SpeakerType> LookupSpeaker(SpeakerEntry speakerEntry) {
-            var speaker = speakerLookup.GetValueOrDefault(speakerEntry.ID);
-            if (speaker == null) {
-                speaker = speakerLookup.GetValueOrDefault(this.fallbackSpeakerReference.ID);
-            }
-            return speaker;
-        }
+		public Speaker<SpeakerType> LookupSpeaker(SpeakerEntry speakerEntry) {
+			var speaker = speakerLookup.GetValueOrDefault(speakerEntry.ID);
+			if (speaker == null) {
+				speaker = speakerLookup.GetValueOrDefault(this.fallbackSpeakerReference.ID);
+			}
+			return speaker;
+		}
 
-        public bool TryStartSequence(EntryReference eventReference) {
-            return this.TryStartSequence(defaultContext, eventReference);
-        }
+		public bool TryStartSequence(EntryReference eventReference) {
+			return this.TryStartSequence(defaultContext, eventReference);
+		}
 
-        public bool TryStartSequence(DialogContext dialogContext, EntryReference eventReference) {
-            eventReference.TryGetEntry(out EventEntry eventEntry);
-            return this.TryStartSequence(dialogContext, eventEntry);
-        }
+		public bool TryStartSequence(DialogContext dialogContext, EntryReference eventReference) {
+			eventReference.TryGetEntry(out EventEntry eventEntry);
+			return this.TryStartSequence(dialogContext, eventEntry);
+		}
 
-        public bool TryStartSequence(EventEntry eventEntry) {
+		public bool TryStartSequence(EventEntry eventEntry) {
 			return this.TryStartSequence(defaultContext, eventEntry);
-        }
+		}
 
-        public bool TryStartSequence(DialogContext dialogContext, EventEntry eventEntry) {
-            if (!dialogContext.WouldInvoke(eventEntry)) {
-                return false;
-            }
+		public bool TryStartSequence(DialogContext dialogContext, EventEntry eventEntry) {
+			if (!dialogContext.WouldInvoke(eventEntry)) {
+				return false;
+			}
 
-            // TODO: Check priority here
+			if (this.isSequenceRunning && (this.currentSequence is DialogSequenceBase<SpeakerType> currentDialogSequence)) {
+				if (!currentDialogSequence.ShouldOverride(eventEntry)) {
+					return false;
+				}
+			}
 
-            DialogSequenceBase<SpeakerType> dialogSequence = dialogSequenceSpawner.Spawn();
-            dialogSequence.rootEntry = eventEntry;
-            dialogSequence.Reset();
+			DialogSequenceBase<SpeakerType> dialogSequence = dialogSequenceSpawner.Spawn();
+			dialogSequence.rootEntry = eventEntry;
+			dialogSequence.Reset();
 
-            this.StartSequence(dialogContext, dialogSequence);
-            return true;
-        }
+			this.StartSequence(dialogContext, dialogSequence);
+			return true;
+		}
 
-        internal void HandleTypewriterEvent(BaseEntry entry, ITypewriterContext iContext) {
+		internal void HandleTypewriterEvent(BaseEntry entry, ITypewriterContext iContext) {
 			if (iContext is not DialogContext dialogContext) {
 				Debug.LogError($"Unknown context type {iContext}");
 				return;
@@ -152,27 +165,39 @@ namespace jmayberry.TypewriterHelper {
 			// Facts are things that are true about the world
 			if (entry is FactEntry factEntry) {
 				Debug.Log($"@Manager.HandleTypewriterEvent.fact; {factEntry}");
-                dialogContext.TryInvoke(factEntry);
-                return;
+				dialogContext.TryInvoke(factEntry);
+				return;
 			}
 
 			// Rules are part of the current sequence
 			if (entry is RuleEntry ruleEntry) {
 				Debug.Log($"@Manager.HandleTypewriterEvent.rule; {ruleEntry}");
-                return;
-            }
+				return;
+			}
 
 			// Events spawn a new sequence
 			if (entry is EventEntry eventEntry) {
 				Debug.Log($"@Manager.HandleTypewriterEvent.event; {eventEntry}");
 				this.TryStartSequence(dialogContext, eventEntry);
-            }
+			}
 
-            Debug.LogError($"Unknown entry type {entry}");
+			Debug.LogError($"Unknown entry type {entry}");
 		}
 
-		public void OnUserInteracted() {
-			this.UserInteractedWithDialog.Invoke();
+		public void OnUserInteractedWithDialog() {
+			if (this.lastInteractionTime + this.InteractionCooldown > Time.time) {
+				return;
+			}
+			this.lastInteractionTime = Time.time;
+			this.EventUserInteractedWithDialog.Invoke();
+		}
+
+		public void OnUpdateBubblePosition() {
+			if (this.lastUpdatePositionTime + this.UpdatePositionCooldown > Time.time) {
+				return;
+			}
+			this.lastUpdatePositionTime = Time.time;
+			this.EventUpdateBubblePosition.Invoke();
 		}
 	}
 }
