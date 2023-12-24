@@ -13,22 +13,27 @@ using jmayberry.TypewriterHelper.Entries;
 using jmayberry.CustomAttributes;
 using jmayberry.EventSequencer;
 using jmayberry.Spawner;
+using UnityEngine.Events;
 
 namespace jmayberry.TypewriterHelper {
 
 	public enum DialogOption {
-		Unknown,
-		NextEntry,
-		SkipPopulate,
-		Close,
-		SelectOption,
+		Unknown = 0,
+		Interact_Inactive = 101,
+		Interact_Active = 102,
+        StartDialog_Inactive = 151,
+        StartDialog_Active = 152,
+        NextEntry = 201,
+		SkipPopulate = 202,
+		Close = 301,
+		SelectOption = 401,
 	}
 
 	[Serializable]
 	public class  ChatBubbleInfo {
-        [Required] public readonly Sprite background;
-        [Required] public readonly Sprite fallbackIconSprite;
-        [SerializedDictionary("Dialog Option", "Icon")] public readonly SerializedDictionary<DialogOption, Sprite> iconSprite;
+        [Required] public Sprite background;
+        [Required] public Sprite fallbackIconSprite;
+        [SerializedDictionary("Dialog Option", "Icon")] public SerializedDictionary<DialogOption, Sprite> iconSprite;
 	}
 
 	public abstract class DialogManagerBase<SpeakerType> : EventManagerBase where SpeakerType : Enum {
@@ -45,6 +50,7 @@ namespace jmayberry.TypewriterHelper {
         protected TypewriterWatcher typewriterWatcher;
 		protected internal static UnitySpawner<ChatBubbleBase<SpeakerType>> chatBubbleSpawner;
         protected internal static CodeSpawner<DialogSequenceBase<SpeakerType>> dialogSequenceSpawner;
+        [Readonly] public UnityEvent UserInteractedWithDialog = new UnityEvent();
 
         public static DialogManagerBase<SpeakerType> instance { get; private set; }
 
@@ -163,6 +169,10 @@ namespace jmayberry.TypewriterHelper {
             }
 
             Debug.LogError($"Unknown entry type {entry}");
+		}
+
+		public void OnUserInteracted() {
+			this.UserInteractedWithDialog.Invoke();
 		}
 	}
 }

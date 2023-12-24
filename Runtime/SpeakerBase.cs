@@ -6,6 +6,7 @@ using Aarthificial.Typewriter.References;
 using Aarthificial.Typewriter.Entries;
 
 using jmayberry.CustomAttributes;
+using System.Collections.Generic;
 
 namespace jmayberry.TypewriterHelper {
 	public class Speaker<SpeakerType> : MonoBehaviour where SpeakerType : Enum {
@@ -14,26 +15,26 @@ namespace jmayberry.TypewriterHelper {
 		[Required][SerializeField] internal ChatBubbleAlignment chatBubbleAlignment = ChatBubbleAlignment.TopMiddle;
 		[Required][SerializeField] internal SpeakerType speakerType;
         [SerializeField] internal string displayName;
-
-        [Header("Debug")]
-        [EntryFilter(Variant = EntryVariant.Fact, AllowEmpty = true)] [SerializeField] private EntryReference speakerReference;
+        [EntryFilter(Variant = EntryVariant.Fact, AllowEmpty = true)] [SerializeField] private List<EntryReference> speakerReference;
 
 		internal DialogContext typewriterContext = new DialogContext();
 
 		void OnEnable() {
-			if (this.speakerReference == 0) {
-				return;
-			}
-
-            DialogManagerBase<SpeakerType>.speakerLookup.Add(this.speakerReference.ID, this);
-		}
+			foreach (EntryReference reference in speakerReference) {
+                if (reference == 0) {
+                    continue;
+                }
+                DialogManagerBase<SpeakerType>.speakerLookup.Add(reference.ID, this);
+            }
+        }
 
 		void OnDisable() {
-			if (this.speakerReference == 0) {
-				return;
-			}
-
-			DialogManagerBase<SpeakerType>.speakerLookup.Remove(this.speakerReference.ID);
+            foreach (EntryReference reference in speakerReference) {
+                if (reference == 0) {
+                    continue;
+                }
+                DialogManagerBase<SpeakerType>.speakerLookup.Remove(reference.ID);
+            }
         }
 
         internal bool IsDifferent(Speaker<SpeakerType> newSpeaker) {

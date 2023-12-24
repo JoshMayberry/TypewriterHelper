@@ -304,8 +304,40 @@ MonoBehaviour:
   speakerText: {fileID: 5303070016502299833}
   iconSpriteRenderer: {fileID: 6058681229043402438}
   backgroundSpriteRenderer: {fileID: 5235843771531632241}
+  container: {fileID: 3214161067152994269}
+  updatesPerSecond: 10
   charsPerSecond: 32
-  padding: {x: 2, y: 2}
+  padding: {x: 0.5, y: 0.5}
+  minBackgroundSize: {x: 0.36, y: 0.32}
+  fallbackSpeakerName: Disembodied Voice
+  growWithText: 1
+  currentText: 
+  currentSpeaker: {fileID: 0}
+  currentEntry:
+    ID: 0
+    Key: 
+    Scope:
+      InternalID: 0
+    Triggers:
+      List: []
+    Once: 0
+    Padding: 0
+    Criteria: []
+    Modifications: []
+    OnApply: []
+    OnInvoke: []
+    priority: 0
+    Speed: 1
+    IsChoice: 0
+    Text: 
+    _speaker:
+      InternalID: 0
+  chatBubbleInfo:
+    background: {fileID: 0}
+    fallbackIconSprite: {fileID: 0}
+    iconSprite:
+      _serializedList: []
+  currentDialogOption: 0
 --- !u!1 &4765965563056884269
 GameObject:
   m_ObjectHideFlags: 0

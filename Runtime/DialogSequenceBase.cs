@@ -16,6 +16,10 @@ using jmayberry.Spawner;
 
 namespace jmayberry.TypewriterHelper {
 	public class DialogSequenceBase<SpeakerType> : SequenceBase where SpeakerType : Enum {
+        [Header("Tweak")]
+        [SerializeField] protected float InteractionCooldown = 0.1f;
+        [Readonly] [SerializeField] public float lastInteractedTime = 0f;
+
         [Header("Debug")]
         [Readonly] public EventEntry rootEntry;
         [Readonly] public ChatBubbleBase<SpeakerType> chatBubble;
@@ -41,12 +45,38 @@ namespace jmayberry.TypewriterHelper {
 
         public override void OnSpawn(object spawner) {
 			this.CreateNewChatBubble();
+            DialogManagerBase<SpeakerType>.instance.UserInteractedWithDialog.AddListener(this.OnUserInteracted);
             base.OnSpawn(spawner);
         }
 
         public override void OnDespawn(object spawner) {
 			this.DoneWithChatBubble();
+            DialogManagerBase<SpeakerType>.instance.UserInteractedWithDialog.RemoveListener(this.OnUserInteracted);
             base.OnDespawn(spawner);
+        }
+
+        public virtual void OnUserInteracted() {
+            if (this.lastInteractedTime + this.InteractionCooldown > Time.time) {
+                return;
+            }
+            this.lastInteractedTime = Time.time;
+
+            if (!this.isStarted) {
+                Debug.LogError("Sequence has not started");
+                return;
+            }
+
+            if (this.isFinished) {
+                Debug.LogError("Sequence has already finished");
+                return;
+            }
+
+            if (this.chatBubble.currentProgress < 1) {
+                this.chatBubble.OnSkipToEnd();
+            }
+            else {
+                this.isContinue = true;
+            }
         }
 
         public bool CanStart() {
@@ -74,7 +104,7 @@ namespace jmayberry.TypewriterHelper {
 		}
 
         // See: https://github.com/aarthificial-unity/foundations/blob/7d43e288317085920a55ea61c09bf30f3371b33c/Assets/Player/PlayerController.cs#L121-L138
-        public override IEnumerator Start(IContext iContext) {
+        public override IEnumerator Start(IContext iContext, Action<SequenceBase> callback) {
 			if (!this.CanStart()) {
 				yield break;
 			}
@@ -93,15 +123,21 @@ namespace jmayberry.TypewriterHelper {
 				yield return new WaitUntil(() => previousEntry != this.currentEntry);
 
 				this.isContinue = false;
-				previousEntry = this.rootEntry;
-				yield return this.HandleCurrentEntry(dialogContext, this.currentEntry);
+				previousEntry = this.currentEntry;
+                yield return this.HandleCurrentEntry(dialogContext, this.currentEntry);
 
 
-                this.isContinue = true; // TODO: This should be set by an event handler
                 yield return new WaitUntil(() => this.isContinue || this.isFinished);
-			}
+                this.isContinue = false;
+
+                if (!dialogContext.HasMatchingRule(previousEntry.ID)) {
+                    this.isFinished = true;
+                }
+            }
 
             DialogManagerBase<SpeakerType>.dialogSequenceSpawner.Despawn(this);
+
+            callback?.Invoke(this);
         }
 
         private IEnumerator HandleCurrentEntry(DialogContext dialogContext, BaseEntry baseEntry) {

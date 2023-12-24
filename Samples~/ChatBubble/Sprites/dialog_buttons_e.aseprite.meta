@@ -133,4 +133,4 @@ ScriptedImporter:
   platformSettings: []
   secondarySpriteTextures: []
   spritePackingTag: 
-  canvasSize: {x: 16, y: 48}
+  canvasSize: {x: 128, y: 48}

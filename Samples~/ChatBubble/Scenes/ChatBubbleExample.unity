@@ -739,7 +739,126 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chatBubbleInfo:
-    _serializedList: []
+    _serializedList:
+    - Key: 0
+      Value:
+        background: {fileID: -1179940737, guid: b07bd21d6148bbe419726ba9f2616174, type: 3}
+        fallbackIconSprite: {fileID: -1644235514, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+        iconSprite:
+          _serializedList:
+          - Key: 0
+            Value: {fileID: 1207813598, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 101
+            Value: {fileID: 1207813598, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 102
+            Value: {fileID: 1538666079, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 151
+            Value: {fileID: 750087799, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 152
+            Value: {fileID: 717465623, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 201
+            Value: {fileID: -1644235514, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 202
+            Value: {fileID: -1252320203, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 301
+            Value: {fileID: 611430556, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 401
+            Value: {fileID: 1310214020, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+    - Key: 1
+      Value:
+        background: {fileID: -1179940737, guid: b07bd21d6148bbe419726ba9f2616174, type: 3}
+        fallbackIconSprite: {fileID: -1644235514, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+        iconSprite:
+          _serializedList:
+          - Key: 0
+            Value: {fileID: 1207813598, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 101
+            Value: {fileID: 1207813598, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 102
+            Value: {fileID: 1538666079, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 151
+            Value: {fileID: 750087799, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 152
+            Value: {fileID: 717465623, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 201
+            Value: {fileID: -1644235514, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 202
+            Value: {fileID: -1252320203, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 301
+            Value: {fileID: 611430556, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 401
+            Value: {fileID: 1310214020, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+    - Key: 2
+      Value:
+        background: {fileID: -905072904, guid: b07bd21d6148bbe419726ba9f2616174, type: 3}
+        fallbackIconSprite: {fileID: 1857164743, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+        iconSprite:
+          _serializedList:
+          - Key: 0
+            Value: {fileID: 1773175152, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 101
+            Value: {fileID: 1773175152, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 102
+            Value: {fileID: 2016095883, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 151
+            Value: {fileID: 725803704, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 152
+            Value: {fileID: -350853562, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 201
+            Value: {fileID: 1857164743, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 202
+            Value: {fileID: 1347167547, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 301
+            Value: {fileID: -115530790, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 401
+            Value: {fileID: 1322314958, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+    - Key: 3
+      Value:
+        background: {fileID: -1819183423, guid: b07bd21d6148bbe419726ba9f2616174, type: 3}
+        fallbackIconSprite: {fileID: -2029955655, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+        iconSprite:
+          _serializedList:
+          - Key: 0
+            Value: {fileID: -1306326633, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 101
+            Value: {fileID: -1306326633, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 102
+            Value: {fileID: 24560468, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 151
+            Value: {fileID: 1110599228, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 152
+            Value: {fileID: 663395466, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 201
+            Value: {fileID: -2029955655, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 202
+            Value: {fileID: -1721781378, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 301
+            Value: {fileID: 1829973123, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+          - Key: 401
+            Value: {fileID: 1594718089, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+  fallbackChatBubbleInfo:
+    background: {fileID: -1179940737, guid: b07bd21d6148bbe419726ba9f2616174, type: 3}
+    fallbackIconSprite: {fileID: -1644235514, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+    iconSprite:
+      _serializedList:
+      - Key: 0
+        Value: {fileID: 1207813598, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+      - Key: 101
+        Value: {fileID: 1207813598, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+      - Key: 102
+        Value: {fileID: 1538666079, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+      - Key: 151
+        Value: {fileID: 750087799, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+      - Key: 152
+        Value: {fileID: 717465623, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+      - Key: 201
+        Value: {fileID: -1644235514, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+      - Key: 202
+        Value: {fileID: -1252320203, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+      - Key: 301
+        Value: {fileID: 611430556, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+      - Key: 401
+        Value: {fileID: 1310214020, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
   chatBubblePrefab: {fileID: 2103633108307872346, guid: 2b576b6ff2d083e4fb9005aba2c29370, type: 3}
   fallbackSpeakerReference:
     InternalID: 3866846
@@ -1226,7 +1345,8 @@ MonoBehaviour:
   speakerType: 2
   displayName: Small Slime
   speakerReference:
-    InternalID: 3866845
+  - InternalID: 3866845
+  - InternalID: 3866846
   speed: 5
 --- !u!1001 &1060958918772318135
 PrefabInstance:
@@ -1283,6 +1403,10 @@ PrefabInstance:
     - target: {fileID: 8259967825773173365, guid: a037e9103cfb6ec49bb311a540bc6ee7, type: 3}
       propertyPath: speakerReference.InternalID
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8259967825773173365, guid: a037e9103cfb6ec49bb311a540bc6ee7, type: 3}
+      propertyPath: speakerReference.Array.data[0].InternalID
+      value: 3866851
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -13,5 +13,9 @@ public enum MySpeakerType {
 }
 
 public class DialogManager : DialogManagerBase<MySpeakerType> {
-    
+    private void Update() {
+        if (Input.GetKeyDown("space")) {
+            this.UserInteractedWithDialog.Invoke();
+        }
+    }
 }
