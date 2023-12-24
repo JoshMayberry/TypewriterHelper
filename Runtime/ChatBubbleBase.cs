@@ -129,12 +129,18 @@ namespace jmayberry.TypewriterHelper {
 			return true;
 		}
 
+		protected virtual bool UpdateIcon(DialogOption newOption) {
+            this.currentDialogOption = newOption;
+			return this.UpdateIcon();
+        }
+
 		protected virtual bool UpdateIcon() {
-			if (this.chatBubbleInfo == null) {
+            if (this.chatBubbleInfo == null) {
 				Debug.Log("Cannot update icon");
 				return false;
 			}
-			this.iconSpriteRenderer.sprite = this.chatBubbleInfo.iconSprite.GetValueOrDefault(this.currentDialogOption, this.chatBubbleInfo.fallbackIconSprite);
+
+            this.iconSpriteRenderer.sprite = this.chatBubbleInfo.iconSprite.GetValueOrDefault(this.currentDialogOption, this.chatBubbleInfo.fallbackIconSprite);
 
 			return true;
 		}
@@ -230,19 +236,21 @@ namespace jmayberry.TypewriterHelper {
 				this.dialogText.maxVisibleCharacters = 0;
 			}
 
-			this.Show();
+
+            this.Show();
 
 			this.skipToEnd = false;
 			float timeToWait = 1 / this.updatesPerSecond;
 			this.currentProgress = 0;
 			float startTime = Time.time;
 			float duration = this.currentText.Length / (this.charsPerSecond * dialogEntry.Speed);
+			this.UpdateIcon(DialogOption.SkipPopulate);
 			while (this.currentProgress < 1) {
-				if (this.skipToEnd) {
+                if (this.skipToEnd) {
 					break;
 				}
 
-				float timeElapsed = Time.time - startTime;
+                float timeElapsed = Time.time - startTime;
 				this.currentProgress = Mathf.Clamp01(timeElapsed / duration);
 				this.UpdateTextProgress(this.currentProgress);
 
@@ -251,9 +259,11 @@ namespace jmayberry.TypewriterHelper {
 
 			this.currentProgress = 1;
 			this.UpdateTextProgress(1);
-		}
 
-		public virtual void OnSkipToEnd() {
+			this.UpdateIcon(this.currentContext.HasMatchingRule(this.currentEntry.ID) ? DialogOption.NextEntry : DialogOption.Close);
+        }
+
+        public virtual void OnSkipToEnd() {
 			this.skipToEnd = true;
 		}
 
