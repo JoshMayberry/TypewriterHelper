@@ -53,8 +53,9 @@ namespace jmayberry.TypewriterHelper {
 		[Header("For Debugging")]
 		public static readonly DialogContext defaultContext = new DialogContext();
 		[SerializeField] internal static Dictionary<int, Speaker<SpeakerType>> speakerLookup = new Dictionary<int, Speaker<SpeakerType>>();
+        [Readonly] public List<BaseEntry> orphanedEntries = new List<BaseEntry>();
 
-		protected TypewriterWatcher typewriterWatcher;
+        protected TypewriterWatcher typewriterWatcher;
 		protected internal static UnitySpawner<ChatBubbleBase<SpeakerType>> chatBubbleSpawner;
 		protected internal static CodeSpawner<DialogSequenceBase<SpeakerType>> dialogSequenceSpawner;
 		
@@ -164,20 +165,17 @@ namespace jmayberry.TypewriterHelper {
 
 			// Facts are things that are true about the world
 			if (entry is FactEntry factEntry) {
-				Debug.Log($"@Manager.HandleTypewriterEvent.fact; {factEntry}");
 				dialogContext.TryInvoke(factEntry);
 				return;
 			}
 
 			// Rules are part of the current sequence
 			if (entry is RuleEntry ruleEntry) {
-				Debug.Log($"@Manager.HandleTypewriterEvent.rule; {ruleEntry}");
 				return;
 			}
 
 			// Events spawn a new sequence
 			if (entry is EventEntry eventEntry) {
-				Debug.Log($"@Manager.HandleTypewriterEvent.event; {eventEntry}");
 				this.TryStartSequence(dialogContext, eventEntry);
 			}
 

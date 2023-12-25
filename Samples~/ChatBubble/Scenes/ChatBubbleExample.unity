@@ -863,7 +863,14 @@ MonoBehaviour:
   chatBubblePrefab: {fileID: 2103633108307872346, guid: 2b576b6ff2d083e4fb9005aba2c29370, type: 3}
   fallbackSpeakerReference:
     InternalID: 3866846
-  UserInteractedWithDialog:
+  InteractionCooldown: 0.1
+  lastInteractionTime: 0
+  UpdatePositionCooldown: 0.01
+  lastUpdatePositionTime: 0
+  EventUserInteractedWithDialog:
+    m_PersistentCalls:
+      m_Calls: []
+  EventUpdateBubblePosition:
     m_PersistentCalls:
       m_Calls: []
 --- !u!1 &1235741846

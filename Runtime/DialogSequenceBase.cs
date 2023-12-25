@@ -89,11 +89,12 @@ namespace jmayberry.TypewriterHelper {
 			}
 
 			this.CreateNewChatBubble();
-			this.isStarted = true;
+
+            this.isStarted = true;
 			TypewriterDatabase.Instance.AddListener(this.HandleTypewriterEvent);
 			dialogContext.Process(this.rootEntry);
 
-			BaseEntry previousEntry = this.rootEntry;
+            BaseEntry previousEntry = this.rootEntry;
 			while (!this.isFinished) {
 				yield return new WaitUntil(() => previousEntry != this.currentEntry);
 
@@ -110,7 +111,8 @@ namespace jmayberry.TypewriterHelper {
 				}
 			}
 
-			this.DoneWithChatBubble();
+            yield return this.chatBubble.Hide();
+            this.DoneWithChatBubble();
 			DialogManagerBase<SpeakerType>.dialogSequenceSpawner.Despawn(this);
 
 			callback?.Invoke(this);
@@ -118,7 +120,7 @@ namespace jmayberry.TypewriterHelper {
 
 		private IEnumerator HandleCurrentEntry(DialogContext dialogContext, BaseEntry baseEntry) {
 			if (baseEntry is DialogEntry dialogEntry) {
-				yield return this.chatBubble.PopulateChatBubble(dialogContext, dialogEntry);
+				yield return this.chatBubble.Populate(dialogContext, dialogEntry);
 			}
 			else {
 				Debug.LogError($"Unknown entry type {baseEntry}");
@@ -135,8 +137,13 @@ namespace jmayberry.TypewriterHelper {
 			}
 
 			if (entry is RuleEntry ruleEntry) {
-				Debug.Log($"@Sequence.HandleTypewriterEvent.rule; {ruleEntry}");
-				// TODO: Check if this rule belongs to the currently held rule
+				BaseEntry entryToCheck = (this.currentEntry != null ? this.currentEntry : this.rootEntry);
+				if (!ruleEntry.Triggers.List.Contains(entryToCheck.ID)) {
+					Debug.LogWarning("A rule that does not belong to this sequence was triggered");
+					DialogManagerBase<SpeakerType>.instance.orphanedEntries.Add(ruleEntry);
+					return;
+                }
+
 				this.currentEntry = ruleEntry;
 				return;
 			}
@@ -192,7 +199,6 @@ namespace jmayberry.TypewriterHelper {
 		protected virtual void CreateNewChatBubble() {
 			DialogManagerBase<SpeakerType>.instance.EventUserInteractedWithDialog.AddListener(this.OnUserInteracted);
 			this.chatBubble = DialogManagerBase<SpeakerType>.chatBubbleSpawner.Spawn();
-			this.chatBubble.Hide();
 		}
 
 		protected virtual void DoneWithChatBubble() {
@@ -209,95 +215,5 @@ namespace jmayberry.TypewriterHelper {
 				this.DoneWithChatBubble();
 			}
 		}
-
-
-
-
-
-
-		//    public override IEnumerator Start(IContext iContext) {
-
-		//        if (iContext is not DialogContext dialogContext) {
-		//            Debug.LogError($"Unknown context type {iContext}");
-		//            yield break;
-		//        }
-
-		//        if (entry is EventEntry eventEntry) {
-		//            if (!dialogContext.WouldInvoke(entry)) {
-		//                return;
-		//            }
-
-		//            if (this.currentSequence != null) {
-		//                // Check if the priority of this event is bigger than the current event
-		//                return;
-
-		//                //this.currentSequence.Cancel();
-		//            }
-
-		//            this.currentSequence = this.SpawnDialogueSequence();
-		//            this.currentSequence.SetEvent(eventEntry, this.SpawnChatBubble());
-		//            dialogContext.Process(entry);
-		//            return;
-		//        }
-
-		//        if (entry is DialogueEntry dialogueEntry) {
-		//            this.currentSequence.Begin(context, dialogueEntry);
-		//            return;
-		//        }
-
-		//        Debug.LogError($"Unknown entry type {entry}");
-
-
-		//        throw new System.Exception("Unknown entry type for '" + entry + "'");
-		//    }
-		//}
-
-
-
-
-
-
-		//internal void SetEvent(EventEntry entry, ChatBubbleBase chatBubble) {
-		//    this.currentEventEntry = entry;
-		//    this.currentType = SequenceType.Unknown;
-		//    this.currentChatBubble = chatBubble;
-		//}
-
-		//internal void Begin(Context context, DialogueEntry entry) {
-		//    this.currentRuleEntry = entry;
-		//    this.currentContext = context;
-		//    this.currentType = SequenceType.Dialogue;
-		//    this.currentSpeaker = EventSequencer.instance.LookupSpeaker(entry);
-
-		//    this.currentChatBubble.Begin(entry.Text, this.currentSpeaker);
-		//}
-
-		//internal void Cancel() {
-		//    this.currentType = SequenceType.Canceled;
-
-		//    this.inputMapper.EventInteract.RemoveListener(this.Cancel);
-		//}
-
-		//internal void Finish() {
-		//    this.inputMapper.EventInteract.AddListener(this.NextDialogue);
-		//}
-
-		//internal void NextDialogue() {
-		//    this.inputMapper.EventInteract.RemoveListener(this.NextDialogue);
-		//}
-
-		//internal void NextDialogueArrayLine() {
-		//    if (this.nextDialogueArrayIndex + 1 > this.latestDialogueArrayEntry.Lines.List.Length) {
-		//        this.currentChatBubble.End();
-		//        return;
-		//    }
-
-		//    DialogueArrayEntryLine line = this.latestDialogueArrayEntry.Lines.List[this.nextDialogueArrayIndex];
-		//    this.currentSpeaker = EventSequencer.instance.LookupSpeaker(line);
-		//    this.currentChatBubble.EventEnded.AddListener(NextDialogueArrayLine);
-		//    this.currentChatBubble.Begin(line.Text, this.currentSpeaker);
-
-		//    this.nextDialogueArrayIndex++;
-		//}
 	}
 }
