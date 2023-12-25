@@ -70,8 +70,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1519332099
+  m_SortingLayer: 1
   m_SortingOrder: 1
   m_Sprite: {fileID: 750087799, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -110,7 +110,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2019314823626133620}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.044190314}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -159,8 +159,8 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1519332099
+  m_SortingLayer: 1
   m_SortingOrder: 3
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &5303070016502299833
@@ -315,9 +315,9 @@ MonoBehaviour:
   maxTextSize: 12
   fallbackSpeakerName: Disembodied Voice
   growWithText: 1
-  skipToEnd: 0
-  currentProgress: 0
+  isUserInteracted: 0
   currentText: 
+  currentProgress: 0
   currentSpeaker: {fileID: 0}
   currentEntry:
     ID: 0
@@ -333,11 +333,11 @@ MonoBehaviour:
     OnApply: []
     OnInvoke: []
     priority: 0
-    Speed: 1
-    IsChoice: 0
-    Text: 
     _speaker:
       InternalID: 0
+    TextList:
+    - 
+    Speed: 1
   chatBubbleInfo:
     background: {fileID: 0}
     fallbackIconSprite: {fileID: 0}
@@ -418,8 +418,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1519332099
+  m_SortingLayer: 1
   m_SortingOrder: 0
   m_Sprite: {fileID: -1179940737, guid: b07bd21d6148bbe419726ba9f2616174, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -466,7 +466,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0.11899996, y: 0.003000021}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 12, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &6186221868362653234
@@ -507,8 +507,8 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1519332099
+  m_SortingLayer: 1
   m_SortingOrder: 3
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &3294998532848439805

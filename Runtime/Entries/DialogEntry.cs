@@ -9,35 +9,16 @@ using Aarthificial.Typewriter.References;
 using jmayberry.EventSequencer;
 
 namespace jmayberry.TypewriterHelper.Entries {
-	/// <summary>
-	/// A rule representing a line of dialogue.
-	/// </summary>
-	/// <remarks>
-	/// Typewriter entries can be extended to store additional information specific
-	/// to your game.
-	/// </remarks>
 	[Serializable]
 	public class DialogEntry : RuleEntry {
 		public EventPriority priority;
+		[EntryFilter(BaseType = typeof(SpeakerEntry))] [SerializeField] private EntryReference _speaker;
 
-		/// <summary>
-		/// The speed at which the text is revealed.
-		/// </summary>
+		[SerializeField][InspectorName("Dialog")][TextArea] public string[] TextList = { "" };
+
+		//public bool IsChoice; // TODO: Impliment this as a list of possible choices and somehow pipe them in
 		[Range(0.25f, 2)] public float Speed = 1f;
 
-		/// <summary>
-		/// Whether this line should end with a choice.
-		/// </summary>
-		public bool IsChoice;
-
-		/// <summary>
-		/// The dialogue line.
-		/// </summary>
-		[TextArea] public string Text; // TODO: Make this an array so it can handle combining multiple entries into one to avoid setting all options over and over
-
-		/// <summary>
-		/// A helper method for resolving the speaker reference.
-		/// </summary>
 		public SpeakerEntry Speaker {
 			get {
 				var speaker = _speaker.GetEntry<SpeakerEntry>();
@@ -49,15 +30,5 @@ namespace jmayberry.TypewriterHelper.Entries {
 			}
 		}
 
-		/// <summary>
-		/// The speaker saying this line.
-		/// </summary>
-		/// <remarks>
-		/// We can use the <see cref="EntryFilterAttribute"/> to restrict the entries
-		/// we can reference to a specific type.
-		/// </remarks>
-		[EntryFilter(BaseType = typeof(SpeakerEntry))]
-		[SerializeField]
-		private EntryReference _speaker;
 	}
 }

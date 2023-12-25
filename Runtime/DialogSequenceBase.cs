@@ -22,7 +22,6 @@ namespace jmayberry.TypewriterHelper {
 		[Readonly] public BaseEntry currentEntry;
 		[Readonly] public bool isStarted;
 		[Readonly] public bool isFinished;
-		[Readonly] public bool isContinue;
 
 		public override string ToString() {
 			return $"<DialogSequenceBase:{this.GetHashCode()}>";
@@ -33,7 +32,6 @@ namespace jmayberry.TypewriterHelper {
 
 		public void Reset() {
 			this.isStarted = false;
-			this.isContinue = false;
 			this.isFinished = false;
 
 			this.currentEntry = null;
@@ -50,12 +48,7 @@ namespace jmayberry.TypewriterHelper {
 				return;
 			}
 
-			if (this.chatBubble.currentProgress < 1) {
-				this.chatBubble.OnSkipToEnd();
-			}
-			else {
-				this.isContinue = true;
-			}
+			this.chatBubble.OnSkipToEnd();
 		}
 
 		public bool CanStart() {
@@ -90,29 +83,24 @@ namespace jmayberry.TypewriterHelper {
 
 			this.CreateNewChatBubble();
 
-            this.isStarted = true;
+			this.isStarted = true;
 			TypewriterDatabase.Instance.AddListener(this.HandleTypewriterEvent);
 			dialogContext.Process(this.rootEntry);
 
-            BaseEntry previousEntry = this.rootEntry;
+			BaseEntry previousEntry = this.rootEntry;
 			while (!this.isFinished) {
 				yield return new WaitUntil(() => previousEntry != this.currentEntry);
 
-				this.isContinue = false;
 				previousEntry = this.currentEntry;
 				yield return this.HandleCurrentEntry(dialogContext, this.currentEntry);
-
-
-				yield return new WaitUntil(() => this.isContinue || this.isFinished);
-				this.isContinue = false;
 
 				if (!dialogContext.HasMatchingRule(previousEntry.ID)) {
 					this.isFinished = true;
 				}
 			}
 
-            yield return this.chatBubble.Hide();
-            this.DoneWithChatBubble();
+			yield return this.chatBubble.Hide();
+			this.DoneWithChatBubble();
 			DialogManagerBase<SpeakerType>.dialogSequenceSpawner.Despawn(this);
 
 			callback?.Invoke(this);
@@ -142,7 +130,7 @@ namespace jmayberry.TypewriterHelper {
 					Debug.LogWarning("A rule that does not belong to this sequence was triggered");
 					DialogManagerBase<SpeakerType>.instance.orphanedEntries.Add(ruleEntry);
 					return;
-                }
+				}
 
 				this.currentEntry = ruleEntry;
 				return;
@@ -198,7 +186,7 @@ namespace jmayberry.TypewriterHelper {
 		protected virtual void DoneWithChatBubble() {
 			TypewriterDatabase.Instance.RemoveListener(this.HandleTypewriterEvent);
 			DialogManagerBase<SpeakerType>.instance.EventUserInteractedWithDialog.RemoveListener(this.OnUserInteracted);
-            DialogManagerBase<SpeakerType>.instance.StartCoroutine(this.chatBubble.HideThenDespawn());
+			DialogManagerBase<SpeakerType>.instance.StartCoroutine(this.chatBubble.HideThenDespawn());
 			this.chatBubble = null;
 		}
 

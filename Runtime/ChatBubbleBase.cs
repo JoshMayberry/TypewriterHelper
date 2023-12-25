@@ -45,7 +45,7 @@ namespace jmayberry.TypewriterHelper {
 		[Required][SerializeField] protected bool growWithText = true;
 
 		[Header("Debug")]
-		[Readonly][SerializeField] protected bool skipToEnd;
+		[Readonly][SerializeField] protected bool isUserInteracted;
 		[Readonly][SerializeField] protected string currentText;
 		[Readonly][SerializeField] protected internal float currentProgress;
 		[Readonly][SerializeField] protected internal Speaker<SpeakerType> currentSpeaker;
@@ -59,32 +59,32 @@ namespace jmayberry.TypewriterHelper {
 				this.transform.position = newPosition.position;
 			}
 
-			this.skipToEnd = false;
+			this.isUserInteracted = false;
 			this.currentText = "";
 			this.currentEntry = null;
-            this.currentProgress = 0f;
+			this.currentProgress = 0f;
 			this.currentContext = null;
 			this.currentSpeaker = null;
 			this.chatBubbleInfo = null;
 
-            this.dialogText.text = "";
-            this.speakerText.text = "";
-            this.container.transform.localPosition = Vector3.zero;
+			this.dialogText.text = "";
+			this.speakerText.text = "";
+			this.container.transform.localPosition = Vector3.zero;
 			this.iconSpriteRenderer.gameObject.transform.localPosition = Vector3.zero;
 			this.DoHide();
 		}
 
 		public virtual void OnSpawn(object spawner) {
 			this.SoftReset();
-            this.chatBubbleInfo = DialogManagerBase<SpeakerType>.instance.fallbackChatBubbleInfo;
-            DialogManagerBase<SpeakerType>.instance.EventUpdateBubblePosition.AddListener(this.UpdatePosition);
+			this.chatBubbleInfo = DialogManagerBase<SpeakerType>.instance.fallbackChatBubbleInfo;
+			DialogManagerBase<SpeakerType>.instance.EventUpdateBubblePosition.AddListener(this.UpdatePosition);
 		}
 
 		public virtual void OnDespawn(object spawner) {
-            DialogManagerBase<SpeakerType>.instance.EventUpdateBubblePosition.RemoveListener(this.UpdatePosition);
+			DialogManagerBase<SpeakerType>.instance.EventUpdateBubblePosition.RemoveListener(this.UpdatePosition);
 		}
 
-        public virtual void DoShow() {
+		public virtual void DoShow() {
 			this.dialogText.gameObject.SetActive(true);
 			this.speakerText.gameObject.SetActive(true);
 			this.iconSpriteRenderer.gameObject.SetActive(true);
@@ -225,20 +225,29 @@ namespace jmayberry.TypewriterHelper {
 
 			yield return this.Show();
 
-			this.skipToEnd = false;
-            yield return this.Populate_PrepareText(dialogEntry);
-			yield return this.Populate_DisplayOverTime(dialogEntry);
-			this.Populate_Finished();
-			this.skipToEnd = false;
+			int i = 0;
+			int i_lastOne = dialogEntry.TextList.Length - 1;
+            foreach (string dialog in dialogEntry.TextList) {
+				this.isUserInteracted = false;
+				yield return this.Populate_PrepareText(dialog);
+				yield return this.Populate_DisplayOverTime(dialogEntry.Speed);
+				this.Populate_Finished((i >= i_lastOne) && !this.currentContext.HasMatchingRule(this.currentEntry.ID));
+
+				this.isUserInteracted = false;
+				yield return new WaitUntil(() => this.isUserInteracted);
+				i++;
+			}
+
+			this.isUserInteracted = false;
 		}
 
-		protected virtual IEnumerator Populate_PrepareText(DialogEntry dialogEntry) {
+		protected virtual IEnumerator Populate_PrepareText(string dialog) {
 			if (this.currentText != "") {
-                float initialProgress = this.currentProgress;
-                yield return this.doOverTime(this.initialAdjustSizeSpeed, (progress) => this.UpdateTextProgress(initialProgress * (1 - progress)));
-            }
+				float initialProgress = this.currentProgress;
+				yield return this.doOverTime(this.initialAdjustSizeSpeed, (progress) => this.UpdateTextProgress(initialProgress * (1 - progress)));
+			}
 
-			this.currentText = dialogEntry.Text;
+			this.currentText = dialog;
 			if (this.growWithText) {
 				this.dialogText.text = "";
 				this.dialogText.maxVisibleCharacters = 99999;
@@ -252,18 +261,18 @@ namespace jmayberry.TypewriterHelper {
 				this.UpdatePosition();
 			}
 
-            this.dialogText.rectTransform.sizeDelta = new Vector2(this.maxTextSize, 0); // Needed to calculate the background based on the text size
-        }
-
-		protected virtual void Populate_Finished() {
-			this.UpdateTextProgress(1);
-			this.UpdateIcon(this.currentContext.HasMatchingRule(this.currentEntry.ID) ? DialogOption.NextEntry : DialogOption.Close);
+			this.dialogText.rectTransform.sizeDelta = new Vector2(this.maxTextSize, 0); // Needed to calculate the background based on the text size
 		}
 
-		protected virtual IEnumerator Populate_DisplayOverTime(DialogEntry dialogEntry) {
+		protected virtual void Populate_Finished(bool isLast) {
+			this.UpdateTextProgress(1);
+			this.UpdateIcon(isLast ? DialogOption.Close : DialogOption.NextEntry);
+		}
+
+		protected virtual IEnumerator Populate_DisplayOverTime(float speed) {
 			this.currentProgress = 0;
 			this.UpdateIcon(DialogOption.SkipPopulate);
-			float duration = this.currentText.Length / (this.charsPerSecond * dialogEntry.Speed);
+			float duration = this.currentText.Length / (this.charsPerSecond * speed);
 			yield return this.doOverTime(duration, this.UpdateTextProgress);
 		}
 
@@ -310,7 +319,8 @@ namespace jmayberry.TypewriterHelper {
 				OnProgressMade(progress);
 				yield return null;
 
-				if (this.skipToEnd) {
+				if (this.isUserInteracted) {
+					this.isUserInteracted = false;
 					break;
 				}
 			}
@@ -330,13 +340,13 @@ namespace jmayberry.TypewriterHelper {
 			Color background_targetColor = new Color(background_originalColor.r, background_originalColor.g, background_originalColor.b, targetOpacity);
 
 			yield return this.doOverTime(this.initialAdjustSizeSpeed, (float progress) => {
-                this.dialogText.color = Color.Lerp(dialog_originalColor, dialog_targetColor, progress);
+				this.dialogText.color = Color.Lerp(dialog_originalColor, dialog_targetColor, progress);
 				this.speakerText.color = Color.Lerp(speaker_originalColor, speaker_targetColor, progress);
 				this.iconSpriteRenderer.color = Color.Lerp(icon_originalColor, icon_targetColor, progress);
 				this.backgroundSpriteRenderer.color = Color.Lerp(background_originalColor, background_targetColor, progress);
 				extraLerp?.Invoke(progress);
 			});
-        }
+		}
 
 		public virtual IEnumerator Show() {
 			if (this.dialogText.gameObject.activeSelf) {
@@ -344,10 +354,10 @@ namespace jmayberry.TypewriterHelper {
 			}
 
 			this.dialogText.text = "";
-            this.DoShow();
+			this.DoShow();
 			this.backgroundSpriteRenderer.size = this.minBackgroundSize;
-            this.dialogText.ForceMeshUpdate(); // Ensure text renders this frame so we can get the size
-            yield return this.LerpOpacity(0, 1);
+			this.dialogText.ForceMeshUpdate(); // Ensure text renders this frame so we can get the size
+			yield return this.LerpOpacity(0, 1);
 		}
 
 		public virtual IEnumerator Hide() {
@@ -356,22 +366,22 @@ namespace jmayberry.TypewriterHelper {
 			}
 
 			if (this.currentProgress >= 0) {
-                float initialProgress = this.currentProgress;
-                yield return this.LerpOpacity(1, 0, (progress) => this.UpdateTextProgress(initialProgress * (1 - progress)));
-            }
+				float initialProgress = this.currentProgress;
+				yield return this.LerpOpacity(1, 0, (progress) => this.UpdateTextProgress(initialProgress * (1 - progress)));
+			}
 			else {
-                yield return this.LerpOpacity(1, 0);
-            }
-            this.DoHide();
-        }
+				yield return this.LerpOpacity(1, 0);
+			}
+			this.DoHide();
+		}
 
-        public virtual IEnumerator HideThenDespawn() {
-            yield return this.Hide();
-            DialogManagerBase<SpeakerType>.chatBubbleSpawner.Despawn(this);
-        }
+		public virtual IEnumerator HideThenDespawn() {
+			yield return this.Hide();
+			DialogManagerBase<SpeakerType>.chatBubbleSpawner.Despawn(this);
+		}
 
-        public virtual void OnSkipToEnd() {
-			this.skipToEnd = true;
+		public virtual void OnSkipToEnd() {
+			this.isUserInteracted = true;
 		}
 
 		public virtual bool HasAnotherEvent() {
