@@ -20,16 +20,24 @@ namespace jmayberry.TypewriterHelper {
 		BottomRight,
 		Left,
 		Right,
-		Center
+		Center,
 	}
 
-	[Serializable]
+	public enum ChatBubbleType {
+		Normal,
+		Thought,
+		Yell,
+		Quiet,
+	}
+
+        [Serializable]
 	public abstract class ChatBubbleBase<SpeakerType> : MonoBehaviour, ISpawnable where SpeakerType : Enum {
 		[Header("Setup")]
 		[Required][SerializeField] protected TextMeshPro dialogText;
 		[Required][SerializeField] protected TextMeshPro speakerText;
 		[Required][SerializeField] protected SpriteRenderer iconSpriteRenderer;
 		[Required][SerializeField] protected SpriteRenderer backgroundSpriteRenderer;
+		[Required][SerializeField] protected SpriteRenderer pointToSpeakerSpriteRenderer;
 		[Required][SerializeField] protected Transform container;
 
 		[Header("Tweak")]
@@ -39,10 +47,17 @@ namespace jmayberry.TypewriterHelper {
 		[Required][SerializeField] protected Vector2 speakerNameOffset = new Vector2(-2f, 0f);
 		[Required][SerializeField] protected Vector2 IconOffset = new Vector2(2f, 2f);
 		[Required][SerializeField] protected Vector2 minBackgroundSize = new Vector2(1.2f, 1f);
+		[Required][SerializeField] protected Vector2 constrainOnScreenPadding = new Vector2(2f, 2f);
 		[Required][SerializeField] protected float minTextSize = 0f;
 		[Required][SerializeField] protected float maxTextSize = 12f;
 		[Required][SerializeField] protected string fallbackSpeakerName = "Disembodied Voice";
 		[Required][SerializeField] protected bool growWithText = true;
+		[Required][SerializeField] protected bool constrainOnScreen = true;
+
+		[Header("Point To Speaker")]
+		[Required][SerializeField] protected bool pointToSpeaker = true;
+		[Required][SerializeField] protected float ptsDistanceFromSpeaker = 0.4f;
+		[Required][SerializeField] protected float ptsDistanceFromSides = 0.6f;
 
 		[Header("Debug")]
 		[Readonly][SerializeField] protected bool isUserInteracted;
@@ -53,8 +68,9 @@ namespace jmayberry.TypewriterHelper {
 		[Readonly][SerializeField] protected internal DialogContext currentContext;
 		[Readonly][SerializeField] protected internal ChatBubbleInfo chatBubbleInfo;
 		[Readonly][SerializeField] protected DialogOption currentDialogOption;
+		[Readonly][SerializeField] protected ChatBubbleType currentChatBubbleType;
 
-		public virtual void SoftReset(Transform newPosition = null) {
+        public virtual void SoftReset(Transform newPosition = null) {
 			if (newPosition != null) {
 				this.transform.position = newPosition.position;
 			}
@@ -70,7 +86,11 @@ namespace jmayberry.TypewriterHelper {
 			this.dialogText.text = "";
 			this.speakerText.text = "";
 			this.container.transform.localPosition = Vector3.zero;
-			this.iconSpriteRenderer.gameObject.transform.localPosition = Vector3.zero;
+			this.iconSpriteRenderer.transform.localPosition = Vector3.zero;
+			this.pointToSpeakerSpriteRenderer.transform.localScale = Vector3.zero;
+			this.pointToSpeakerSpriteRenderer.transform.eulerAngles = Vector3.zero;
+			this.pointToSpeakerSpriteRenderer.transform.localPosition = Vector3.zero;
+
 			this.DoHide();
 		}
 
@@ -89,13 +109,15 @@ namespace jmayberry.TypewriterHelper {
 			this.speakerText.gameObject.SetActive(true);
 			this.iconSpriteRenderer.gameObject.SetActive(true);
 			this.backgroundSpriteRenderer.gameObject.SetActive(true);
+			this.pointToSpeakerSpriteRenderer.gameObject.SetActive(this.pointToSpeaker);
 		}
 
 		public virtual void DoHide() {
-			this.iconSpriteRenderer.gameObject.SetActive(false);
 			this.dialogText.gameObject.SetActive(false);
 			this.speakerText.gameObject.SetActive(false);
+			this.iconSpriteRenderer.gameObject.SetActive(false);
 			this.backgroundSpriteRenderer.gameObject.SetActive(false);
+			this.pointToSpeakerSpriteRenderer.gameObject.SetActive(false);
 		}
 
 		protected virtual bool UpdateSpeaker() {
@@ -139,24 +161,25 @@ namespace jmayberry.TypewriterHelper {
 			}
 
 			this.chatBubbleInfo = DialogManagerBase<SpeakerType>.instance.chatBubbleInfo.GetValueOrDefault(newSpeaker.speakerType, DialogManagerBase<SpeakerType>.instance.fallbackChatBubbleInfo);
-			this.backgroundSpriteRenderer.sprite = this.chatBubbleInfo.background;
-			return this.UpdateIcon(default);
+			return this.UpdateSprites(default);
 		}
 
-		protected virtual bool UpdateIcon(DialogOption newOption) {
+		protected virtual bool UpdateSprites(DialogOption newOption) {
 			this.currentDialogOption = newOption;
-			return this.UpdateIcon();
+			return this.UpdateSprites();
 		}
 
-		protected virtual bool UpdateIcon() {
+		protected virtual bool UpdateSprites() {
 			if (this.chatBubbleInfo == null) {
 				Debug.Log("Cannot update icon");
 				return false;
 			}
 
 			this.iconSpriteRenderer.sprite = this.chatBubbleInfo.iconSprite.GetValueOrDefault(this.currentDialogOption, this.chatBubbleInfo.fallbackIconSprite);
+            this.backgroundSpriteRenderer.sprite = this.chatBubbleInfo.backgroundSprite.GetValueOrDefault(this.currentChatBubbleType, this.chatBubbleInfo.fallbackBackground);
+            this.pointToSpeakerSpriteRenderer.sprite = this.chatBubbleInfo.pointToSpeakerSprite.GetValueOrDefault(this.currentChatBubbleType, this.chatBubbleInfo.fallbackPointToSpeakerSprite);
 
-			return true;
+            return true;
 		}
 
 		public virtual void UpdatePosition() {
@@ -168,41 +191,71 @@ namespace jmayberry.TypewriterHelper {
 			this.container.transform.position = this.UpdatePosition_getBackgroundPosition(this.currentSpeaker.chatBubblePosition.position, backgroundSize, this.currentSpeaker.chatBubbleAlignment);
 			this.iconSpriteRenderer.transform.position = this.UpdatePosition_getIconPosition(this.container.transform.position, backgroundSize, this.iconSpriteRenderer.size, this.IconOffset);
 			this.speakerText.gameObject.transform.position = this.UpdatePosition_getSpeakerPosition(this.container.transform.position, backgroundSize, this.speakerNameOffset);
+		
+			if (this.pointToSpeaker) {
+				var (trianglePosition, angle, flipSide) = UpdatePosition_getPointToSpeaker(this.currentSpeaker.chatBubblePosition.position, this.backgroundSpriteRenderer.transform.position, backgroundSize);
+				// Apply position and rotation to the triangle sprite
+				this.pointToSpeakerSpriteRenderer.transform.position = trianglePosition;
+				this.pointToSpeakerSpriteRenderer.transform.eulerAngles = new Vector3(0, 0, angle);
+				this.pointToSpeakerSpriteRenderer.transform.localScale = new Vector3(flipSide, 1, 1);
+			}
 		}
 
-		protected virtual Vector2 UpdatePosition_getBackgroundPosition(Vector2 basePosition, Vector2 backgroundSize, ChatBubbleAlignment alignment) {
+		protected virtual Vector2 UpdatePosition_getBackgroundPosition(Vector2 position, Vector2 backgroundSize, ChatBubbleAlignment alignment) {
 			switch (alignment) {
 				case ChatBubbleAlignment.TopLeft:
-					return basePosition + new Vector2(-backgroundSize.x / 2, backgroundSize.y / 2);
+					position += new Vector2(-backgroundSize.x / 2, backgroundSize.y / 2);
+					break;
 
 				case ChatBubbleAlignment.TopMiddle:
-					return basePosition + new Vector2(0, backgroundSize.y / 2);
+					position += new Vector2(0, backgroundSize.y / 2);
+					break;
 
 				case ChatBubbleAlignment.TopRight:
-					return basePosition + new Vector2(backgroundSize.x / 2, backgroundSize.y / 2);
+					position += new Vector2(backgroundSize.x / 2, backgroundSize.y / 2);
+					break;
 
 				case ChatBubbleAlignment.BottomLeft:
-					return basePosition + new Vector2(-backgroundSize.x / 2, -backgroundSize.y / 2);
+					position += new Vector2(-backgroundSize.x / 2, -backgroundSize.y / 2);
+					break;
 
 				case ChatBubbleAlignment.BottomMiddle:
-					return basePosition + new Vector2(0, -backgroundSize.y / 2);
+					position += new Vector2(0, -backgroundSize.y / 2);
+					break;
 
 				case ChatBubbleAlignment.BottomRight:
-					return basePosition + new Vector2(backgroundSize.x / 2, -backgroundSize.y / 2);
+					position += new Vector2(backgroundSize.x / 2, -backgroundSize.y / 2);
+					break;
 
 				case ChatBubbleAlignment.Left:
-					return basePosition + new Vector2(-backgroundSize.x / 2, 0);
+					position += new Vector2(-backgroundSize.x / 2, 0);
+					break;
 
 				case ChatBubbleAlignment.Right:
-					return basePosition + new Vector2(backgroundSize.x / 2, 0);
+					position += new Vector2(backgroundSize.x / 2, 0);
+					break;
 
 				case ChatBubbleAlignment.Center:
 					// no need to modify the position
-					return basePosition;
+					break;
+
+				default:
+					Debug.Log($"Unknown alignment {alignment}");
+					break;
 			}
 
-			Debug.Log($"Unknown alignment {alignment}");
-			return basePosition;
+			if (this.constrainOnScreen) {
+				Vector2 screenBottomLeft = Camera.main.ViewportToWorldPoint(new Vector2(0, 0));
+				Vector2 screenTopRight = Camera.main.ViewportToWorldPoint(new Vector2(1, 1));
+
+				float halfWidth = backgroundSize.x / 2;
+				float halfHeight = backgroundSize.y / 2;
+
+				position.x = Mathf.Clamp(position.x, screenBottomLeft.x + halfWidth + constrainOnScreenPadding.x, screenTopRight.x - halfWidth - constrainOnScreenPadding.x);
+				position.y = Mathf.Clamp(position.y, screenBottomLeft.y + halfHeight + constrainOnScreenPadding.y, screenTopRight.y - halfHeight - constrainOnScreenPadding.y);
+			}
+
+			return position;
 		}
 
 		protected virtual Vector2 UpdatePosition_getIconPosition(Vector2 basePosition, Vector2 backgroundSize, Vector2 iconSize, Vector2 offsetPosition) {
@@ -215,9 +268,42 @@ namespace jmayberry.TypewriterHelper {
 			return basePosition + new Vector2(-backgroundSize.x / 2 + 1 + offsetPosition.x, backgroundSize.y / 2 + offsetPosition.y);
 		}
 
-		public virtual IEnumerator Populate(DialogContext dialogContext, DialogEntry dialogEntry) {
+        protected virtual (Vector2, float, int) UpdatePosition_getPointToSpeaker(Vector2 speakerPosition, Vector2 backgroundPosition, Vector2 backgroundSize) {
+            Vector2 trianglePosition = Vector2.zero;
+            float rotationAngle = 0f;
+            bool flipHorizontally = false;
+
+            bool isSpeakerAbove = speakerPosition.y > backgroundPosition.y;
+            bool isSpeakerRight = speakerPosition.x > backgroundPosition.x;
+
+            if (isSpeakerAbove) {
+                rotationAngle = 180f;
+                flipHorizontally = !isSpeakerRight;
+
+                float xPos = Mathf.Clamp(speakerPosition.x, backgroundPosition.x - backgroundSize.x / 2 + this.ptsDistanceFromSides, backgroundPosition.x + backgroundSize.x / 2 - this.ptsDistanceFromSides);
+                trianglePosition = new Vector2(xPos, backgroundPosition.y + backgroundSize.y / 2);
+            }
+            else {
+                flipHorizontally = isSpeakerRight;
+
+                float xPos = Mathf.Clamp(speakerPosition.x, backgroundPosition.x - backgroundSize.x / 2 + this.ptsDistanceFromSides, backgroundPosition.x + backgroundSize.x / 2 - this.ptsDistanceFromSides);
+                trianglePosition = new Vector2(xPos, backgroundPosition.y - backgroundSize.y / 2);
+            }
+
+            if (isSpeakerRight) {
+                trianglePosition.x = Mathf.Max(trianglePosition.x - this.ptsDistanceFromSpeaker, backgroundPosition.x - backgroundSize.x / 2 + this.ptsDistanceFromSides);
+            }
+            else {
+                trianglePosition.x = Mathf.Min(trianglePosition.x + this.ptsDistanceFromSpeaker, backgroundPosition.x + backgroundSize.x / 2 - this.ptsDistanceFromSides);
+            }
+
+            return (trianglePosition, rotationAngle, (flipHorizontally ? -1 : 1));
+        }
+
+        public virtual IEnumerator Populate(DialogContext dialogContext, DialogEntry dialogEntry) {
 			this.currentEntry = dialogEntry;
 			this.currentContext = dialogContext;
+			this.currentChatBubbleType = dialogEntry.chatKind;
 
 			if (!UpdateSpeaker()) {
 				yield break;
@@ -227,7 +313,7 @@ namespace jmayberry.TypewriterHelper {
 
 			int i = 0;
 			int i_lastOne = dialogEntry.TextList.Length - 1;
-            foreach (string dialog in dialogEntry.TextList) {
+			foreach (string dialog in dialogEntry.TextList) {
 				this.isUserInteracted = false;
 				yield return this.Populate_PrepareText(dialog);
 				yield return this.Populate_DisplayOverTime(dialogEntry.Speed);
@@ -266,12 +352,12 @@ namespace jmayberry.TypewriterHelper {
 
 		protected virtual void Populate_Finished(bool isLast) {
 			this.UpdateTextProgress(1);
-			this.UpdateIcon(isLast ? DialogOption.Close : DialogOption.NextEntry);
+			this.UpdateSprites(isLast ? DialogOption.Close : DialogOption.NextEntry);
 		}
 
 		protected virtual IEnumerator Populate_DisplayOverTime(float speed) {
 			this.currentProgress = 0;
-			this.UpdateIcon(DialogOption.SkipPopulate);
+			this.UpdateSprites(DialogOption.SkipPopulate);
 			float duration = this.currentText.Length / (this.charsPerSecond * speed);
 			yield return this.doOverTime(duration, this.UpdateTextProgress);
 		}

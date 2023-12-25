@@ -11,8 +11,9 @@ using jmayberry.EventSequencer;
 namespace jmayberry.TypewriterHelper.Entries {
 	[Serializable]
 	public class DialogEntry : RuleEntry {
-		public EventPriority priority;
-		[EntryFilter(BaseType = typeof(SpeakerEntry))] [SerializeField] private EntryReference _speaker;
+		public EventPriority priority = EventPriority.None;
+		public ChatBubbleType chatKind = ChatBubbleType.Normal;
+        [EntryFilter(BaseType = typeof(SpeakerEntry))] [SerializeField] private EntryReference _speaker;
 
 		[SerializeField][InspectorName("Dialog")][TextArea] public string[] TextList = { "" };
 

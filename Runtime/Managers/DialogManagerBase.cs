@@ -31,12 +31,15 @@ namespace jmayberry.TypewriterHelper {
 
 	[Serializable]
 	public class  ChatBubbleInfo {
-		[Required] public Sprite background;
+		[Required] public Sprite fallbackBackground;
 		[Required] public Sprite fallbackIconSprite;
+		[Required] public Sprite fallbackPointToSpeakerSprite;
 		[SerializedDictionary("Dialog Option", "Icon")] public SerializedDictionary<DialogOption, Sprite> iconSprite;
-	}
+		[SerializedDictionary("Chat Type", "Background")] public SerializedDictionary<ChatBubbleType, Sprite> backgroundSprite;
+		[SerializedDictionary("Chat Type", "Pointer")] public SerializedDictionary<ChatBubbleType, Sprite> pointToSpeakerSprite;
+    }
 
-	public abstract class DialogManagerBase<SpeakerType> : EventManagerBase where SpeakerType : Enum {
+    public abstract class DialogManagerBase<SpeakerType> : EventManagerBase where SpeakerType : Enum {
 		[Header("Setup")]
 		[SerializedDictionary("Speaker Type", "Chat Bubble")] public SerializedDictionary<SpeakerType, ChatBubbleInfo> chatBubbleInfo = new SerializedDictionary<SpeakerType, ChatBubbleInfo>();
 		public ChatBubbleInfo fallbackChatBubbleInfo;
@@ -53,9 +56,9 @@ namespace jmayberry.TypewriterHelper {
 		[Header("For Debugging")]
 		public static readonly DialogContext defaultContext = new DialogContext();
 		[SerializeField] internal static Dictionary<int, Speaker<SpeakerType>> speakerLookup = new Dictionary<int, Speaker<SpeakerType>>();
-        [Readonly] public List<BaseEntry> orphanedEntries = new List<BaseEntry>();
+		[Readonly] public List<BaseEntry> orphanedEntries = new List<BaseEntry>();
 
-        protected TypewriterWatcher typewriterWatcher;
+		protected TypewriterWatcher typewriterWatcher;
 		protected internal static UnitySpawner<ChatBubbleBase<SpeakerType>> chatBubbleSpawner;
 		protected internal static CodeSpawner<DialogSequenceBase<SpeakerType>> dialogSequenceSpawner;
 		
