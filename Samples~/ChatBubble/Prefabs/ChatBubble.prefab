@@ -306,7 +306,7 @@ MonoBehaviour:
   backgroundSpriteRenderer: {fileID: 5235843771531632241}
   container: {fileID: 3214161067152994269}
   charsPerSecond: 32
-  initialAdjustSizeSpeed: 2
+  initialAdjustSizeSpeed: 0.2
   padding: {x: 0.8, y: 0.5}
   speakerNameOffset: {x: -0.4, y: 0}
   IconOffset: {x: 0.4, y: -0.2}

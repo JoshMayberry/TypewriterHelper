@@ -189,12 +189,6 @@ namespace jmayberry.TypewriterHelper {
 			yield break;
 		}
 
-
-
-
-
-
-
 		// Chat bubble functions; override these to do things like a chat bubble history
 		protected virtual void CreateNewChatBubble() {
 			DialogManagerBase<SpeakerType>.instance.EventUserInteractedWithDialog.AddListener(this.OnUserInteracted);
@@ -204,7 +198,7 @@ namespace jmayberry.TypewriterHelper {
 		protected virtual void DoneWithChatBubble() {
 			TypewriterDatabase.Instance.RemoveListener(this.HandleTypewriterEvent);
 			DialogManagerBase<SpeakerType>.instance.EventUserInteractedWithDialog.RemoveListener(this.OnUserInteracted);
-			DialogManagerBase<SpeakerType>.chatBubbleSpawner.Despawn(this.chatBubble);
+            DialogManagerBase<SpeakerType>.instance.StartCoroutine(this.chatBubble.HideThenDespawn());
 			this.chatBubble = null;
 		}
 
