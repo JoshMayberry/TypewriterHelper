@@ -13,22 +13,7 @@ namespace jmayberry.TypewriterHelper.Samples.ChatBubble {
 		Skeleton,
 	}
 
-	public class DialogManager : DialogManagerBase<MySpeakerType> {
-		protected internal static CodeSpawner<TemporaryChatSequence<MySpeakerType>> dialogSequenceSpawner;
-
-		protected override void Awake() {
-			base.Awake();
-			dialogSequenceSpawner = new CodeSpawner<TemporaryChatSequence<MySpeakerType>>();
-		}
-		protected override BaseChatSequence<MySpeakerType> SpawnDialogSequence() {
-			return dialogSequenceSpawner.Spawn();
-		}
-
-		protected override void DespawnDialogSequence(BaseChatSequence<MySpeakerType> spawnling) {
-			dialogSequenceSpawner.Despawn((TemporaryChatSequence<MySpeakerType>)spawnling);
-		}
-
-
+	public class DialogManager : ObjectDialogManager<MySpeakerType> {
 		private void Update() {
 			if (Input.GetKeyDown("space")) {
 				this.EventUserInteractedWithDialog.Invoke();

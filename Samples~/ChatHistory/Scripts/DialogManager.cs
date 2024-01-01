@@ -1,9 +1,19 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+using AYellowpaper.SerializedCollections;
+using Aarthificial.Typewriter.References;
+using Aarthificial.Typewriter.Attributes;
+using Aarthificial.Typewriter.Entries;
+using Aarthificial.Typewriter.Tools;
+using Aarthificial.Typewriter;
+
+using jmayberry.TypewriterHelper.Entries;
+using jmayberry.CustomAttributes;
+using jmayberry.EventSequencer;
 using jmayberry.Spawner;
-using jmayberry.TypewriterHelper;
+using UnityEngine.Events;
 
 namespace jmayberry.TypewriterHelper.Samples.ChatHistory {
 	public enum MySpeakerType {
@@ -13,22 +23,25 @@ namespace jmayberry.TypewriterHelper.Samples.ChatHistory {
 		Skeleton,
 	}
 
-	public class DialogManager : DialogManagerBase<MySpeakerType> {
-		protected internal static CodeSpawner<PermanentChatSequence<MySpeakerType>> dialogSequenceSpawner;
+	public class DialogManager : HistoryDialogManager<MySpeakerType> {
+
 
 		protected override void Awake() {
 			base.Awake();
-			dialogSequenceSpawner = new CodeSpawner<PermanentChatSequence<MySpeakerType>>();
-		}
-		protected override BaseChatSequence<MySpeakerType> SpawnDialogSequence() {
-			return dialogSequenceSpawner.Spawn();
-		}
 
-		protected override void DespawnDialogSequence(BaseChatSequence<MySpeakerType> spawnling) {
-			dialogSequenceSpawner.Despawn((PermanentChatSequence<MySpeakerType>)spawnling);
-		}
+			List<ChatBubble> bubbleList = new List<ChatBubble>();
+			foreach (Transform chatBubbleTransform in this.chatBubbleContainer.transform) {
+				ChatBubble chatBubble = chatBubbleTransform.GetComponent<ChatBubble>();
+				if (chatBubble != null) {
+                    bubbleList.Add(chatBubble);
+                }
+			}
 
-		private void Update() {
+			foreach (ChatBubble chatBubble in bubbleList) {
+                chatBubbleSpawner.ShouldBeInactive(chatBubble);
+            }
+        }
+        private void Update() {
 			if (Input.GetKeyDown("space")) {
 				this.EventUserInteractedWithDialog.Invoke();
 			}

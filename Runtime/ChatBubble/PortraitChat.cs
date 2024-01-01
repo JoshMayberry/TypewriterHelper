@@ -18,8 +18,9 @@ namespace jmayberry.TypewriterHelper {
 		}
 
 		public override void OnSpawn(object spawner) {
+			base.OnSpawn(spawner);
 			throw new System.NotImplementedException();
-		}
+        }
 
 		protected internal override IEnumerator DespawnCoroutine() {
 			throw new System.NotImplementedException();
@@ -37,15 +38,7 @@ namespace jmayberry.TypewriterHelper {
 			throw new System.NotImplementedException();
 		}
 
-		protected override void UpdateSpeaker_setText(Speaker<SpeakerType> newSpeaker) {
-			throw new System.NotImplementedException();
-		}
-
 		protected override bool UpdateSprites() {
-			throw new System.NotImplementedException();
-		}
-
-		protected override void UpdateTextProgress_SetText(int textLength) {
 			throw new System.NotImplementedException();
 		}
 	}

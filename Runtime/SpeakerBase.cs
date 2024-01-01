@@ -24,7 +24,7 @@ namespace jmayberry.TypewriterHelper {
 				if (reference == 0) {
 					continue;
 				}
-				DialogManagerBase<SpeakerType>.speakerLookup.Add(reference.ID, this);
+				BaseDialogManager<SpeakerType>.speakerLookup.Add(reference.ID, this);
 			}
 		}
 
@@ -33,7 +33,7 @@ namespace jmayberry.TypewriterHelper {
 				if (reference == 0) {
 					continue;
 				}
-				DialogManagerBase<SpeakerType>.speakerLookup.Remove(reference.ID);
+				BaseDialogManager<SpeakerType>.speakerLookup.Remove(reference.ID);
 			}
 		}
 

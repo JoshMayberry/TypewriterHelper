@@ -34,12 +34,7 @@ namespace jmayberry.TypewriterHelper {
 
 		public override void OnDespawn(object spawner) {
 			TypewriterDatabase.Instance.RemoveListener(this.HandleTypewriterEvent);
-			DialogManagerBase<SpeakerType>.instance.EventUserInteractedWithDialog.RemoveListener(this.OnUserInteracted);
-
-			if (this.chatBubble != null) {
-				DialogManagerBase<SpeakerType>.instance.StartCoroutine(this.chatBubble.DespawnCoroutine());
-				this.chatBubble = null;
-			}
+			BaseDialogManager<SpeakerType>.instance.EventUserInteractedWithDialog.RemoveListener(this.OnUserInteracted);
 		}
 
 		public virtual void Reset() {
@@ -111,16 +106,16 @@ namespace jmayberry.TypewriterHelper {
 				}
 			}
 
-			yield return this.chatBubble.OnFinishedSequence();
 			yield return this.Start_Post(dialogContext);
 
 			callback?.Invoke(this);
 		}
 
 		public abstract IEnumerator Start_Pre(DialogContext dialogContext);
+
 		public abstract IEnumerator Start_Post(DialogContext dialogContext);
 
-		private IEnumerator HandleCurrentEntry(DialogContext dialogContext, BaseEntry baseEntry) {
+		protected virtual IEnumerator HandleCurrentEntry(DialogContext dialogContext, BaseEntry baseEntry) {
 			if (baseEntry is DialogEntry dialogEntry) {
 				yield return this.chatBubble.Populate(dialogContext, dialogEntry);
 			}
@@ -142,7 +137,7 @@ namespace jmayberry.TypewriterHelper {
 				BaseEntry entryToCheck = (this.currentEntry != null ? this.currentEntry : this.rootEntry);
 				if (!ruleEntry.Triggers.List.Contains(entryToCheck.ID)) {
 					Debug.LogWarning("A rule that does not belong to this sequence was triggered");
-					DialogManagerBase<SpeakerType>.instance.orphanedEntries.Add(ruleEntry);
+					BaseDialogManager<SpeakerType>.instance.orphanedEntries.Add(ruleEntry);
 					return;
 				}
 
@@ -187,8 +182,7 @@ namespace jmayberry.TypewriterHelper {
 
 		public override IEnumerator OnCancel() {
 			this.isFinished = true;
-			DialogManagerBase<SpeakerType>.instance.DespawnDialogSequence(this);
-			yield break;
+			yield return null;
 		}
 	}
 }

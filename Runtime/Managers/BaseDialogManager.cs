@@ -16,7 +16,6 @@ using jmayberry.Spawner;
 using UnityEngine.Events;
 
 namespace jmayberry.TypewriterHelper {
-
 	public enum DialogOption {
 		Unknown = 0,
 		Interact_Inactive = 101,
@@ -30,7 +29,7 @@ namespace jmayberry.TypewriterHelper {
 	}
 
 	[Serializable]
-	public class  ChatBubbleInfo {
+	public class ChatBubbleInfo {
 		[Required] public Sprite fallbackBackground;
 		[Required] public Sprite fallbackIconSprite;
 		[Required] public Sprite fallbackPointToSpeakerSprite;
@@ -38,38 +37,36 @@ namespace jmayberry.TypewriterHelper {
 		[SerializedDictionary("Chat Type", "Background")] public SerializedDictionary<ChatBubbleType, Sprite> backgroundSprite;
 		[SerializedDictionary("Chat Type", "Pointer")] public SerializedDictionary<ChatBubbleType, Sprite> pointToSpeakerSprite;
 	}
-
-	public abstract class DialogManagerBase<SpeakerType> : EventManagerBase where SpeakerType : Enum {
-		[Header("Setup")]
+	public abstract class BaseDialogManager<SpeakerType> : EventManagerBase where SpeakerType : Enum {
+		[Header("Base: Setup")]
 		[SerializedDictionary("Speaker Type", "Chat Bubble")] public SerializedDictionary<SpeakerType, ChatBubbleInfo> chatBubbleInfo = new SerializedDictionary<SpeakerType, ChatBubbleInfo>();
 		public ChatBubbleInfo fallbackChatBubbleInfo;
-		[Required] [SerializeField] private BaseChat<SpeakerType> chatBubblePrefab;
+		[Required][SerializeField] private BaseChat<SpeakerType> chatBubblePrefab;
 		[EntryFilter(Variant = EntryVariant.Fact)] public EntryReference fallbackSpeakerReference;
 
-
-		[Header("Tweak")]
+		[Header("Base: Tweak")]
 		[SerializeField] protected float InteractionCooldown = 0.1f;
 		[Readonly][SerializeField] public float lastInteractionTime = 0f;
 		[SerializeField] protected float UpdatePositionCooldown = 0.1f;
 		[Readonly][SerializeField] public float lastUpdatePositionTime = 0f;
 
-		[Header("For Debugging")]
+		[Header("Base: For Debugging")]
 		public static readonly DialogContext defaultContext = new DialogContext();
 		[SerializeField] internal static Dictionary<int, Speaker<SpeakerType>> speakerLookup = new Dictionary<int, Speaker<SpeakerType>>();
 		[Readonly] public List<BaseEntry> orphanedEntries = new List<BaseEntry>();
 
 		protected TypewriterWatcher typewriterWatcher;
 		protected internal static UnitySpawner<BaseChat<SpeakerType>> chatBubbleSpawner;
-		
-		[Header("Events")]
+
+		[Header("Base: Events")]
 		[Readonly] public UnityEvent EventUserInteractedWithDialog = new UnityEvent();
 		[Readonly] public UnityEvent EventUpdateBubblePosition = new UnityEvent();
 
-		public static DialogManagerBase<SpeakerType> instance { get; private set; }
+		public static BaseDialogManager<SpeakerType> instance { get; private set; }
 
 		protected virtual void Awake() {
 			if (instance != null && instance != this) {
-				Debug.LogError("Found more than one DialogManager<SpeakerType> in the scene.");
+				Debug.LogError("Found more than one BaseDialogManager<SpeakerType> in the scene.");
 				Destroy(this.gameObject);
 				return;
 			}
@@ -87,9 +84,7 @@ namespace jmayberry.TypewriterHelper {
 			TypewriterDatabase.Instance.RemoveListener(this.HandleTypewriterEvent);
 		}
 
-		protected internal abstract BaseChatSequence<SpeakerType> SpawnDialogSequence();
-
-		protected internal abstract void DespawnDialogSequence(BaseChatSequence<SpeakerType> spawnling);
+		protected abstract BaseChatSequence<SpeakerType> SpawnDialogSequence();
 
 		public int GetFact(ITypewriterContext context, EntryReference factReference) {
 			factReference.TryGetEntry(out FactEntry factEntry);

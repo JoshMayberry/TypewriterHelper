@@ -5,6 +5,7 @@ using UnityEngine;
 using TMPro;
 
 using jmayberry.CustomAttributes;
+using jmayberry.Spawner;
 
 namespace jmayberry.TypewriterHelper {
 	public enum ChatBubbleAlignment {
@@ -22,61 +23,45 @@ namespace jmayberry.TypewriterHelper {
 	[Serializable]
 	public abstract class BaseObjectChat<SpeakerType> : BaseChat<SpeakerType> where SpeakerType : Enum {
 		[Header("Object: Setup")]
-		[Required][SerializeField] protected TextMeshPro dialogText;
-		[Required][SerializeField] protected TextMeshPro speakerText;
 		[Required][SerializeField] protected SpriteRenderer iconSpriteRenderer;
 		[Required][SerializeField] protected SpriteRenderer backgroundSpriteRenderer;
 		[Required][SerializeField] protected Transform container;
 
 		[Header("Object: Tweak")]
-		[Required][SerializeField] protected Vector2 padding = new Vector2(2f, 2f);
 		[Required][SerializeField] protected Vector2 speakerNameOffset = new Vector2(-2f, 0f);
-		[Required][SerializeField] protected Vector2 IconOffset = new Vector2(2f, 2f);
-		[Required][SerializeField] protected Vector2 minBackgroundSize = new Vector2(1.2f, 1f);
+        [Required][SerializeField] protected Vector2 IconOffset = new Vector2(2f, 2f);
 		[Required][SerializeField] protected Vector2 constrainOnScreenPadding = new Vector2(2f, 2f);
-		[Required][SerializeField] protected float minTextSize = 0f;
+		//[Required][SerializeField] protected float minTextSize = 0f;
 		[Required][SerializeField] protected float maxTextSize = 12f;
-		[Required][SerializeField] protected bool growWithText = true;
 		[Required][SerializeField] protected bool constrainOnScreen = true;
 
 		public override void SoftReset(Transform newPosition = null) {
-			this.dialogText.text = "";
-			this.speakerText.text = "";
-			this.container.transform.localPosition = Vector3.zero;
+			this.backgroundSpriteRenderer.transform.localPosition = Vector3.zero;
 			this.iconSpriteRenderer.transform.localPosition = Vector3.zero;
-
 			base.SoftReset(newPosition);
-
-			this.DoHide();
 		}
 
 		public override void OnSpawn(object spawner) {
-			this.SoftReset();
-			this.chatBubbleInfo = DialogManagerBase<SpeakerType>.instance.fallbackChatBubbleInfo;
-			DialogManagerBase<SpeakerType>.instance.EventUpdateBubblePosition.AddListener(this.UpdatePosition);
+			base.OnSpawn(spawner);
+			BaseDialogManager<SpeakerType>.instance.EventUpdateBubblePosition.AddListener(this.UpdatePosition);
 		}
 
 		public override void OnDespawn(object spawner) {
-			DialogManagerBase<SpeakerType>.instance.EventUpdateBubblePosition.RemoveListener(this.UpdatePosition);
+			base.OnDespawn(spawner);
+			BaseDialogManager<SpeakerType>.instance.EventUpdateBubblePosition.RemoveListener(this.UpdatePosition);
 		}
 
-		public virtual void DoShow() {
-			this.dialogText.gameObject.SetActive(true);
-			this.speakerText.gameObject.SetActive(true);
-			this.iconSpriteRenderer.gameObject.SetActive(true);
-			this.backgroundSpriteRenderer.gameObject.SetActive(true);
+		protected override void SetSpriteActive(bool state) {
+			this.iconSpriteRenderer.gameObject.SetActive(state);
+			this.backgroundSpriteRenderer.gameObject.SetActive(state);
 		}
 
-		public virtual void DoHide() {
-			this.dialogText.gameObject.SetActive(false);
-			this.speakerText.gameObject.SetActive(false);
-			this.iconSpriteRenderer.gameObject.SetActive(false);
-			this.backgroundSpriteRenderer.gameObject.SetActive(false);
+		protected override void UpdateContainerSize(Vector2 newSize) {
+			this.backgroundSpriteRenderer.size = newSize;
 		}
 
-		protected override void UpdateSpeaker_setText(Speaker<SpeakerType> newSpeaker) {
-			this.speakerText.text = this.UpdateSpeaker_getSpeakerName(newSpeaker);
-			this.speakerText.ForceMeshUpdate(); // Ensure text renders this frame so we can get the size
+		protected override Vector2 GetContainerScale() {
+			return this.backgroundSpriteRenderer.transform.localScale;
 		}
 
 		protected override bool UpdateSprites() {
@@ -89,8 +74,44 @@ namespace jmayberry.TypewriterHelper {
 			this.backgroundSpriteRenderer.sprite = this.chatBubbleInfo.backgroundSprite.GetValueOrDefault(this.currentChatBubbleType, this.chatBubbleInfo.fallbackBackground);
 			return true;
 		}
+		protected override Color GetSpriteColor() {
+			return this.backgroundSpriteRenderer.color;
+		}
 
-		public virtual void UpdatePosition() {
+		protected override void SetSpriteColor(Color newColor) {
+			this.iconSpriteRenderer.color = newColor;
+			this.backgroundSpriteRenderer.color = newColor;
+		}
+
+		protected override IEnumerator Populate_PreLoop() {
+			yield return null;
+		}
+
+		protected override IEnumerator Populate_PrepareText(string dialog) {
+			yield return base.Populate_PrepareText(dialog);
+
+			if (!this.growWithText) {
+				this.UpdatePosition();
+			}
+
+			this.dialogText.rectTransform.sizeDelta = new Vector2(this.maxTextSize, 0); // Needed to calculate the background based on the text size
+		}
+
+		internal override void UpdateTextProgress(float progress) {
+			base.UpdateTextProgress(progress);
+
+			if (this.growWithText) {
+				this.UpdatePosition();
+			}
+		}
+
+        protected override Vector2 GetContainerTargetSize() {
+            Vector2 textSize = this.dialogText.GetRenderedValues(false);
+            Vector2 targetSize = (textSize + this.padding);
+            return new Vector2(Mathf.Max(this.minContainerSize.x, targetSize.x), Mathf.Max(this.minContainerSize.y, targetSize.y)) / this.GetContainerScale();
+        }
+
+        public virtual void UpdatePosition() {
 			if (this.currentSpeaker == null) {
 				return;
 			}
@@ -166,117 +187,6 @@ namespace jmayberry.TypewriterHelper {
 		protected virtual Vector2 UpdatePosition_getSpeakerPosition(Vector2 basePosition, Vector2 backgroundSize, Vector2 offsetPosition) {
 			// Move name to top left corner
 			return basePosition + new Vector2(-backgroundSize.x / 2 + 1 + offsetPosition.x, backgroundSize.y / 2 + offsetPosition.y);
-		}
-
-		protected override IEnumerator Populate_PreLoop() {
-			yield return this.Show();
-		}
-
-		protected override IEnumerator Populate_PrepareText(string dialog) {
-			if (this.currentText != "") {
-				float initialProgress = this.currentProgress;
-				yield return this.doOverTime(this.initialAdjustSizeSpeed, (progress) => this.UpdateTextProgress(initialProgress * (1 - progress)));
-			}
-
-			this.currentText = dialog;
-			if (this.growWithText) {
-				this.dialogText.text = "";
-				this.dialogText.maxVisibleCharacters = 99999;
-			}
-			else {
-				this.dialogText.text = this.currentText;
-				this.dialogText.maxVisibleCharacters = 0;
-			}
-
-			if (!this.growWithText) {
-				this.UpdatePosition();
-			}
-
-			this.dialogText.rectTransform.sizeDelta = new Vector2(this.maxTextSize, 0); // Needed to calculate the background based on the text size
-		}
-
-		internal override void UpdateTextProgress(float progress) {
-			base.UpdateTextProgress(progress);
-
-			if (this.growWithText) {
-				this.backgroundSpriteRenderer.size = this.UpdateTextProgress_getBackgroundSize();
-				this.UpdatePosition();
-			}
-		}
-
-		protected virtual Vector2 UpdateTextProgress_getBackgroundSize() {
-			Vector2 textSize = this.dialogText.GetRenderedValues(false);
-			Vector2 targetSize = (textSize + this.padding) / this.backgroundSpriteRenderer.transform.localScale;
-			return new Vector2(Mathf.Max(this.minBackgroundSize.x, targetSize.x), Mathf.Max(this.minBackgroundSize.y, targetSize.y)); // Ensure the sprite does not get squished
-		}
-
-		protected override void UpdateTextProgress_SetText(int textLength) {
-			if (this.growWithText) {
-				this.dialogText.text = this.currentText[..textLength];
-				this.dialogText.ForceMeshUpdate(); // Ensure text renders this frame so we can get the size
-			}
-			else {
-				// See: https://github.com/aarthificial-unity/foundations/blob/7d43e288317085920a55ea61c09bf30f3371b33c/Assets/View/Dialogue/DialogueBubble.cs#L122
-				this.dialogText.maxVisibleCharacters = textLength;
-			}
-		}
-
-		protected virtual IEnumerator LerpOpacity(float initialOpacity, float targetOpacity, Action<float> extraLerp = null) {
-			Color dialog_originalColor = new Color(this.dialogText.color.r, this.dialogText.color.g, this.dialogText.color.b, initialOpacity);
-			Color dialog_targetColor = new Color(dialog_originalColor.r, dialog_originalColor.g, dialog_originalColor.b, targetOpacity);
-
-			Color speaker_originalColor = new Color(this.speakerText.color.r, this.speakerText.color.g, this.speakerText.color.b, initialOpacity);
-			Color speaker_targetColor = new Color(speaker_originalColor.r, speaker_originalColor.g, speaker_originalColor.b, targetOpacity);
-
-			Color icon_originalColor = new Color(this.iconSpriteRenderer.color.r, this.iconSpriteRenderer.color.g, this.iconSpriteRenderer.color.b, initialOpacity);
-			Color icon_targetColor = new Color(icon_originalColor.r, icon_originalColor.g, icon_originalColor.b, targetOpacity);
-
-			Color background_originalColor = new Color(this.backgroundSpriteRenderer.color.r, this.backgroundSpriteRenderer.color.g, this.backgroundSpriteRenderer.color.b, initialOpacity);
-			Color background_targetColor = new Color(background_originalColor.r, background_originalColor.g, background_originalColor.b, targetOpacity);
-
-			yield return this.doOverTime(this.initialAdjustSizeSpeed, (float progress) => {
-				this.dialogText.color = Color.Lerp(dialog_originalColor, dialog_targetColor, progress);
-				this.speakerText.color = Color.Lerp(speaker_originalColor, speaker_targetColor, progress);
-				this.iconSpriteRenderer.color = Color.Lerp(icon_originalColor, icon_targetColor, progress);
-				this.backgroundSpriteRenderer.color = Color.Lerp(background_originalColor, background_targetColor, progress);
-				extraLerp?.Invoke(progress);
-			});
-		}
-
-		public virtual IEnumerator Show() {
-			if (this.dialogText.gameObject.activeSelf) {
-				yield break;
-			}
-
-			this.dialogText.text = "";
-			this.DoShow();
-			this.backgroundSpriteRenderer.size = this.minBackgroundSize;
-			this.dialogText.ForceMeshUpdate(); // Ensure text renders this frame so we can get the size
-			yield return this.LerpOpacity(0, 1);
-		}
-
-		public virtual IEnumerator Hide() {
-			if (!this.dialogText.gameObject.activeSelf) {
-				yield break;
-			}
-
-			if (this.currentProgress >= 0) {
-				float initialProgress = this.currentProgress;
-				yield return this.LerpOpacity(1, 0, (progress) => this.UpdateTextProgress(initialProgress * (1 - progress)));
-			}
-			else {
-				yield return this.LerpOpacity(1, 0);
-			}
-			this.DoHide();
-		}
-
-		protected internal override IEnumerator OnFinishedSequence() {
-			yield return this.Hide();
-		}
-
-		protected internal override IEnumerator DespawnCoroutine() {
-			yield return this.Hide();
-			DialogManagerBase<SpeakerType>.chatBubbleSpawner.Despawn(this);
 		}
 	}
 }
