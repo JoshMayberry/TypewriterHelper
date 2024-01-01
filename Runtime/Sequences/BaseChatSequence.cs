@@ -23,14 +23,12 @@ namespace jmayberry.TypewriterHelper {
 		[Readonly] public bool isStarted;
 		[Readonly] public bool isFinished;
 
-		public override string ToString() {
+        public override string ToString() {
 			return $"<DialogSequenceBase:{this.GetHashCode()}>";
 		}
 
 		public BaseChatSequence() : base() {
 		}
-
-		public override void OnSpawn(object spawner) { }
 
 		public override void OnDespawn(object spawner) {
 			TypewriterDatabase.Instance.RemoveListener(this.HandleTypewriterEvent);

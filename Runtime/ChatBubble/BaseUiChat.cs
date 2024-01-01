@@ -22,7 +22,7 @@ namespace jmayberry.TypewriterHelper {
 
 		[Header("Ui: Tweak")]
         [SerializeField] protected Vector3 initialContainerScale = new Vector3(1, 1, 1);
-        [SerializeField] protected Vector2 containerPadding = new Vector2(-20, 0); // For scrollbars
+        [SerializeField] protected Vector2 containerPadding = new Vector2(10, 0); // For scrollbars
 
         protected override void SetSpriteActive(bool state) {
 			this.iconImage.gameObject.SetActive(state);
@@ -65,9 +65,9 @@ namespace jmayberry.TypewriterHelper {
 			this.backgroundImage.color = newColor;
 		}
 
-		protected override IEnumerator Populate_PreLoop() {
+		protected internal override IEnumerator Populate_PreLoop(DialogContext dialogContext, DialogEntry dialogEntry) {
 			this.container.localScale = initialContainerScale; // Patch for scale changing for some reason
-			yield return null;
+			yield return base.Populate_PreLoop(dialogContext, dialogEntry);
         }
 
 		//protected override IEnumerator Populate_PrepareText(string dialog) {

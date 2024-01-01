@@ -24,23 +24,6 @@ namespace jmayberry.TypewriterHelper.Samples.ChatHistory {
 	}
 
 	public class DialogManager : HistoryDialogManager<MySpeakerType> {
-
-
-		protected override void Awake() {
-			base.Awake();
-
-			List<ChatBubble> bubbleList = new List<ChatBubble>();
-			foreach (Transform chatBubbleTransform in this.chatBubbleContainer.transform) {
-				ChatBubble chatBubble = chatBubbleTransform.GetComponent<ChatBubble>();
-				if (chatBubble != null) {
-                    bubbleList.Add(chatBubble);
-                }
-			}
-
-			foreach (ChatBubble chatBubble in bubbleList) {
-                chatBubbleSpawner.ShouldBeInactive(chatBubble);
-            }
-        }
         private void Update() {
 			if (Input.GetKeyDown("space")) {
 				this.EventUserInteractedWithDialog.Invoke();

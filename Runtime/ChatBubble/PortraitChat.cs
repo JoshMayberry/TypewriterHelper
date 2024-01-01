@@ -30,10 +30,6 @@ namespace jmayberry.TypewriterHelper {
 			throw new System.NotImplementedException();
 		}
 
-		protected override IEnumerator Populate_PreLoop() {
-			throw new System.NotImplementedException();
-		}
-
 		protected override IEnumerator Populate_PrepareText(string dialog) {
 			throw new System.NotImplementedException();
 		}

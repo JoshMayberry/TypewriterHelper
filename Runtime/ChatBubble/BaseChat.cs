@@ -141,26 +141,18 @@ namespace jmayberry.TypewriterHelper {
 		protected abstract bool UpdateSprites();
 
 		public virtual IEnumerator Populate(DialogContext dialogContext, DialogEntry dialogEntry) {
-			this.currentEntry = dialogEntry;
-			this.currentContext = dialogContext;
-			this.currentChatBubbleType = dialogEntry.chatKind;
+            yield return this.Populate_PreLoop(dialogContext, dialogEntry);
 
-			if (!UpdateSpeaker()) {
-				yield break;
-			}
-
-			yield return this.Populate_PreLoop();
-			yield return this.Show();
-
-			int i = 0;
+            int i = 0;
 			int i_lastOne = dialogEntry.TextList.Length - 1;
-			foreach (string dialog in dialogEntry.TextList) {
-				this.isUserInteracted = false;
-				yield return this.Populate_PrepareText(dialog);
-				yield return this.Populate_DisplayOverTime(dialogEntry.Speed);
-				this.Populate_Finished((i >= i_lastOne) && !this.currentContext.HasMatchingRule(this.currentEntry.ID));
+			bool isLastInSequence = !this.currentContext.HasMatchingRule(this.currentEntry.ID);
 
+            foreach (string dialog in dialogEntry.TextList) {
 				this.isUserInteracted = false;
+				bool isLastInLoop = (i >= i_lastOne);
+                yield return this.Populate_Loop(dialogContext, dialogEntry, dialog, i, isLastInLoop, isLastInSequence);
+
+                this.isUserInteracted = false;
 				yield return new WaitUntil(() => this.isUserInteracted);
 				i++;
 			}
@@ -168,7 +160,17 @@ namespace jmayberry.TypewriterHelper {
 			this.isUserInteracted = false;
 		}
 
-		protected abstract IEnumerator Populate_PreLoop();
+		protected internal virtual IEnumerator Populate_PreLoop(DialogContext dialogContext, DialogEntry dialogEntry) {
+            this.currentEntry = dialogEntry;
+            this.currentContext = dialogContext;
+            this.currentChatBubbleType = dialogEntry.chatKind;
+
+            if (!UpdateSpeaker()) {
+                yield break;
+            }
+
+            yield return this.Show();
+        }
 
 		protected virtual IEnumerator Populate_PrepareText(string dialog) {
 			if (this.currentText != "") {
@@ -187,9 +189,15 @@ namespace jmayberry.TypewriterHelper {
 			}
 		}
 
-		protected virtual void Populate_Finished(bool isLast) {
+		public virtual IEnumerator Populate_Loop(DialogContext dialogContext, DialogEntry dialogEntry, string dialog, int i, bool isLastInLoop, bool isLastInSequence) {
+            yield return this.Populate_PrepareText(dialog);
+            yield return this.Populate_DisplayOverTime(dialogEntry.Speed);
+            this.Populate_Finished(isLastInLoop, isLastInSequence);
+        }
+
+		protected virtual void Populate_Finished(bool isLastInLoop, bool isLastInSequence) {
 			this.UpdateTextProgress(1);
-			this.UpdateSprites(isLast ? DialogOption.Close : DialogOption.NextEntry);
+			this.UpdateSprites((isLastInLoop && isLastInSequence) ? DialogOption.Close : DialogOption.NextEntry);
 		}
 
 		protected virtual IEnumerator Populate_DisplayOverTime(float speed) {
@@ -327,6 +335,7 @@ namespace jmayberry.TypewriterHelper {
 				extraLerp?.Invoke(progress);
 			});
 		}
+
 		public virtual void SetOpacity(float value) {
 			this.dialogText.color = new Color(this.dialogText.color.r, this.dialogText.color.g, this.dialogText.color.b, value);
 			this.speakerText.color = new Color(this.speakerText.color.r, this.speakerText.color.g, this.speakerText.color.b, value);

@@ -139,6 +139,8 @@ namespace jmayberry.TypewriterHelper {
 		}
 
 		public bool TryStartSequence(DialogContext dialogContext, EventEntry eventEntry) {
+			// TODO: Add a cooldown?
+
 			if (!dialogContext.WouldInvoke(eventEntry)) {
 				return false;
 			}
@@ -196,6 +198,6 @@ namespace jmayberry.TypewriterHelper {
 			}
 			this.lastUpdatePositionTime = Time.time;
 			this.EventUpdateBubblePosition.Invoke();
-		}
-	}
+        }
+    }
 }

@@ -83,10 +83,6 @@ namespace jmayberry.TypewriterHelper {
 			this.backgroundSpriteRenderer.color = newColor;
 		}
 
-		protected override IEnumerator Populate_PreLoop() {
-			yield return null;
-		}
-
 		protected override IEnumerator Populate_PrepareText(string dialog) {
 			yield return base.Populate_PrepareText(dialog);
 

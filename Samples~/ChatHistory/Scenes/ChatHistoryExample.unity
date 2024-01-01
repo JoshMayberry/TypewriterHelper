@@ -1171,6 +1171,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 015e4b94e957f2b43a110f48afbdb49c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isOverriding: 0
   isSequenceRunning: 0
   chatBubbleInfo:
     _serializedList:
@@ -1339,6 +1340,7 @@ MonoBehaviour:
   EventUpdateBubblePosition:
     m_PersistentCalls:
       m_Calls: []
+  chatBubbleContainerToHide: {fileID: 1749501106}
   chatBubbleContainer: {fileID: 1667144830}
   chatBubbleContainerRectTransform: {fileID: 0}
 --- !u!1 &1235741846
@@ -2153,7 +2155,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.050980393}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2272,8 +2274,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1419173800}
   m_HandleRect: {fileID: 1419173799}
   m_Direction: 0
-  m_Value: 1
-  m_Size: 0.99999994
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

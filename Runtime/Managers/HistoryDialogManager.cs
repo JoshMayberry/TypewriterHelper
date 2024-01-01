@@ -19,8 +19,9 @@ using jmayberry.Spawner;
 namespace jmayberry.TypewriterHelper {
 	public class HistoryDialogManager<SpeakerType> : BaseDialogManager<SpeakerType> where SpeakerType : Enum {
 		[Header("History: Setup")]
+		[Required][SerializeField] public RectTransform chatBubbleContainerToHide;
 		[Required][SerializeField] public VerticalLayoutGroup chatBubbleContainer;
-		[Readonly][SerializeField] public RectTransform chatBubbleContainerRectTransform;
+        [Readonly][SerializeField] public RectTransform chatBubbleContainerRectTransform;
 
         protected internal static CodeSpawner<HistoryChatSequence<SpeakerType>> dialogSequenceSpawner;
 		public static HistoryDialogManager<SpeakerType> instanceHistory { get; private set; }
@@ -38,6 +39,8 @@ namespace jmayberry.TypewriterHelper {
 
 			dialogSequenceSpawner = new CodeSpawner<HistoryChatSequence<SpeakerType>>();
 			this.chatBubbleContainerRectTransform = this.chatBubbleContainer.GetComponent<RectTransform>();
+
+			this.HideChat();
         }
 
 		protected override BaseChatSequence<SpeakerType> SpawnDialogSequence() {
@@ -46,6 +49,46 @@ namespace jmayberry.TypewriterHelper {
 
 		public virtual void RefreshContainer() {
             LayoutRebuilder.ForceRebuildLayoutImmediate(this.chatBubbleContainerRectTransform);
+        }
+
+		protected internal virtual void Clear() {
+			List<HistoryBubbleChat<SpeakerType>> removeList = new List<HistoryBubbleChat<SpeakerType>>();
+            foreach (RectTransform childTransform in this.chatBubbleContainerRectTransform) {
+				HistoryBubbleChat<SpeakerType> child = childTransform.GetComponent<HistoryBubbleChat<SpeakerType>>();
+                if (child != null) {
+                    removeList.Add(child);
+                }
+            }
+
+			foreach (var child in removeList) {
+                chatBubbleSpawner.ShouldBeInactive(child);
+            }
+        }
+
+        protected internal virtual void ShowChat() {
+			this.Clear();
+            this.chatBubbleContainerToHide.gameObject.SetActive(true);
+        }
+
+        protected internal virtual void HideChat() {
+            this.chatBubbleContainerToHide.gameObject.SetActive(false);
+			this.Clear();
+        }
+
+		public override void StopSequence(SequenceBase sequence, Coroutine coroutine, bool hardStop = false) {
+			base.StopSequence(sequence, coroutine, hardStop);
+
+			if (!this.isOverriding) {
+				this.HideChat();
+			}
+        }
+
+        protected override void OnSequenceFinished(SequenceBase sequence) {
+            base.OnSequenceFinished(sequence);
+
+            if (sequence is HistoryChatSequence<SpeakerType> historySequence) {
+                historySequence.Despawn();
+            }
         }
     }
 }

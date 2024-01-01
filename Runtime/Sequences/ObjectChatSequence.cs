@@ -16,7 +16,38 @@ using jmayberry.Spawner;
 
 namespace jmayberry.TypewriterHelper {
 	public class ObjectChatSequence<SpeakerType> : BaseChatSequence<SpeakerType> where SpeakerType : Enum {
-		public override IEnumerator Start_Pre(DialogContext dialogContext) {
+        [Readonly][SerializeField] protected CodeSpawner<ObjectChatSequence<SpeakerType>> spawner;
+        public override void OnSpawn(object spawner) {
+            base.OnSpawn(spawner);
+
+            if (spawner is CodeSpawner<ObjectChatSequence<SpeakerType>> sequenceSpawner) {
+                this.spawner = sequenceSpawner;
+            }
+            else {
+                Debug.LogError($"Unknown spawner type {spawner}");
+            }
+        }
+
+        public override void OnDespawn(object spawner) {
+            base.OnDespawn(spawner);
+            this.spawner = null;
+
+            if (this.chatBubble != null) {
+                BaseDialogManager<SpeakerType>.instance.StartCoroutine(this.chatBubble.DespawnCoroutine());
+                this.chatBubble = null;
+            }
+        }
+
+        public virtual void Despawn() {
+            if (this.spawner != null) {
+                this.spawner.Despawn(this);
+            }
+            else {
+                Debug.LogError("Spawner not set");
+            }
+        }
+
+        public override IEnumerator Start_Pre(DialogContext dialogContext) {
 			ObjectDialogManager<SpeakerType>.instance.EventUserInteractedWithDialog.AddListener(this.OnUserInteracted);
 			this.chatBubble = ObjectDialogManager<SpeakerType>.chatBubbleSpawner.Spawn();
 			yield return null;
@@ -29,15 +60,6 @@ namespace jmayberry.TypewriterHelper {
 		public override IEnumerator OnCancel() {
 			ObjectDialogManager<SpeakerType>.dialogSequenceSpawner.Despawn(this);
 			yield return base.OnCancel();
-		}
-
-		public override void OnDespawn(object spawner) {
-			base.OnDespawn(spawner);
-
-			if (this.chatBubble != null) {
-				BaseDialogManager<SpeakerType>.instance.StartCoroutine(this.chatBubble.DespawnCoroutine());
-				this.chatBubble = null;
-			}
 		}
 	}
 }

@@ -26,6 +26,14 @@ namespace jmayberry.TypewriterHelper {
 
 		protected override BaseChatSequence<SpeakerType> SpawnDialogSequence() {
 			return dialogSequenceSpawner.Spawn();
-		}
-	}
+        }
+
+        protected override void OnSequenceFinished(SequenceBase sequence) {
+            base.OnSequenceFinished(sequence);
+
+			if (sequence is ObjectChatSequence<SpeakerType> objectSequence) {
+                objectSequence.Despawn();
+			}
+        }
+    }
 }
