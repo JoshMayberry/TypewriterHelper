@@ -1,0 +1,19 @@
+{
+    "name": "jmayberry.TypewriterHelper.Sample.ChatUi",
+    "rootNamespace": "",
+    "references": [
+        "jmayberry.TypewriterHelper",
+        "jmayberry.Spawner",
+        "Aarthificial.Typewriter",
+        "jmayberry.EventSequencer"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

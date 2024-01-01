@@ -15,10 +15,10 @@ using jmayberry.EventSequencer;
 using jmayberry.Spawner;
 
 namespace jmayberry.TypewriterHelper {
-	public class DialogSequenceBase<SpeakerType> : SequenceBase where SpeakerType : Enum {
-		[Header("Debug")]
+	public abstract class BaseChatSequence<SpeakerType> : SequenceBase where SpeakerType : Enum {
+		[Header("Base: Debug")]
 		[Readonly] public EventEntry rootEntry;
-		[Readonly] public ChatBubbleBase<SpeakerType> chatBubble;
+		[Readonly] public BaseChat<SpeakerType> chatBubble;
 		[Readonly] public BaseEntry currentEntry;
 		[Readonly] public bool isStarted;
 		[Readonly] public bool isFinished;
@@ -27,10 +27,22 @@ namespace jmayberry.TypewriterHelper {
 			return $"<DialogSequenceBase:{this.GetHashCode()}>";
 		}
 
-		public DialogSequenceBase() : base() {
+		public BaseChatSequence() : base() {
 		}
 
-		public void Reset() {
+		public override void OnSpawn(object spawner) { }
+
+		public override void OnDespawn(object spawner) {
+			TypewriterDatabase.Instance.RemoveListener(this.HandleTypewriterEvent);
+			DialogManagerBase<SpeakerType>.instance.EventUserInteractedWithDialog.RemoveListener(this.OnUserInteracted);
+
+			if (this.chatBubble != null) {
+				DialogManagerBase<SpeakerType>.instance.StartCoroutine(this.chatBubble.DespawnCoroutine());
+				this.chatBubble = null;
+			}
+		}
+
+		public virtual void Reset() {
 			this.isStarted = false;
 			this.isFinished = false;
 
@@ -51,7 +63,7 @@ namespace jmayberry.TypewriterHelper {
 			this.chatBubble.OnSkipToEnd();
 		}
 
-		public bool CanStart() {
+		public virtual bool CanStart() {
 			if (this.isStarted) {
 				Debug.LogError("Sequence has already started");
 				return false;
@@ -81,7 +93,7 @@ namespace jmayberry.TypewriterHelper {
 				yield break;
 			}
 
-			this.CreateNewChatBubble();
+			yield return this.Start_Pre(dialogContext);
 
 			this.isStarted = true;
 			TypewriterDatabase.Instance.AddListener(this.HandleTypewriterEvent);
@@ -99,12 +111,14 @@ namespace jmayberry.TypewriterHelper {
 				}
 			}
 
-			yield return this.chatBubble.Hide();
-			this.DoneWithChatBubble();
-			DialogManagerBase<SpeakerType>.dialogSequenceSpawner.Despawn(this);
+			yield return this.chatBubble.OnFinishedSequence();
+			yield return this.Start_Post(dialogContext);
 
 			callback?.Invoke(this);
 		}
+
+		public abstract IEnumerator Start_Pre(DialogContext dialogContext);
+		public abstract IEnumerator Start_Post(DialogContext dialogContext);
 
 		private IEnumerator HandleCurrentEntry(DialogContext dialogContext, BaseEntry baseEntry) {
 			if (baseEntry is DialogEntry dialogEntry) {
@@ -173,29 +187,8 @@ namespace jmayberry.TypewriterHelper {
 
 		public override IEnumerator OnCancel() {
 			this.isFinished = true;
-			DialogManagerBase<SpeakerType>.dialogSequenceSpawner.Despawn(this);
+			DialogManagerBase<SpeakerType>.instance.DespawnDialogSequence(this);
 			yield break;
-		}
-
-		// Chat bubble functions; override these to do things like a chat bubble history
-		protected virtual void CreateNewChatBubble() {
-			DialogManagerBase<SpeakerType>.instance.EventUserInteractedWithDialog.AddListener(this.OnUserInteracted);
-			this.chatBubble = DialogManagerBase<SpeakerType>.chatBubbleSpawner.Spawn();
-		}
-
-		protected virtual void DoneWithChatBubble() {
-			TypewriterDatabase.Instance.RemoveListener(this.HandleTypewriterEvent);
-			DialogManagerBase<SpeakerType>.instance.EventUserInteractedWithDialog.RemoveListener(this.OnUserInteracted);
-			DialogManagerBase<SpeakerType>.instance.StartCoroutine(this.chatBubble.HideThenDespawn());
-			this.chatBubble = null;
-		}
-
-		public override void OnSpawn(object spawner) { }
-
-		public override void OnDespawn(object spawner) {
-			if (this.chatBubble != null) {
-				this.DoneWithChatBubble();
-			}
 		}
 	}
 }

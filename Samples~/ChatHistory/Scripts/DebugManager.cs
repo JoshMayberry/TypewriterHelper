@@ -5,7 +5,7 @@ using Aarthificial.Typewriter.Entries;
 using Aarthificial.Typewriter.Attributes;
 using Aarthificial.Typewriter.References;
 
-namespace jmayberry.TypewriterHelper.Samples.ChatBubble {
+namespace jmayberry.TypewriterHelper.Samples.ChatHistory {
 	public class DebugManager : MonoBehaviour {
 
 		[EntryFilter(Variant = EntryVariant.Event)] public EntryReference testConversation;

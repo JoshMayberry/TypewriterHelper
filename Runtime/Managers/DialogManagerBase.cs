@@ -37,13 +37,13 @@ namespace jmayberry.TypewriterHelper {
 		[SerializedDictionary("Dialog Option", "Icon")] public SerializedDictionary<DialogOption, Sprite> iconSprite;
 		[SerializedDictionary("Chat Type", "Background")] public SerializedDictionary<ChatBubbleType, Sprite> backgroundSprite;
 		[SerializedDictionary("Chat Type", "Pointer")] public SerializedDictionary<ChatBubbleType, Sprite> pointToSpeakerSprite;
-    }
+	}
 
-    public abstract class DialogManagerBase<SpeakerType> : EventManagerBase where SpeakerType : Enum {
+	public abstract class DialogManagerBase<SpeakerType> : EventManagerBase where SpeakerType : Enum {
 		[Header("Setup")]
 		[SerializedDictionary("Speaker Type", "Chat Bubble")] public SerializedDictionary<SpeakerType, ChatBubbleInfo> chatBubbleInfo = new SerializedDictionary<SpeakerType, ChatBubbleInfo>();
 		public ChatBubbleInfo fallbackChatBubbleInfo;
-		[Required] [SerializeField] private ChatBubbleBase<SpeakerType> chatBubblePrefab;
+		[Required] [SerializeField] private BaseChat<SpeakerType> chatBubblePrefab;
 		[EntryFilter(Variant = EntryVariant.Fact)] public EntryReference fallbackSpeakerReference;
 
 
@@ -59,8 +59,7 @@ namespace jmayberry.TypewriterHelper {
 		[Readonly] public List<BaseEntry> orphanedEntries = new List<BaseEntry>();
 
 		protected TypewriterWatcher typewriterWatcher;
-		protected internal static UnitySpawner<ChatBubbleBase<SpeakerType>> chatBubbleSpawner;
-		protected internal static CodeSpawner<DialogSequenceBase<SpeakerType>> dialogSequenceSpawner;
+		protected internal static UnitySpawner<BaseChat<SpeakerType>> chatBubbleSpawner;
 		
 		[Header("Events")]
 		[Readonly] public UnityEvent EventUserInteractedWithDialog = new UnityEvent();
@@ -68,7 +67,7 @@ namespace jmayberry.TypewriterHelper {
 
 		public static DialogManagerBase<SpeakerType> instance { get; private set; }
 
-		private void Awake() {
+		protected virtual void Awake() {
 			if (instance != null && instance != this) {
 				Debug.LogError("Found more than one DialogManager<SpeakerType> in the scene.");
 				Destroy(this.gameObject);
@@ -77,17 +76,20 @@ namespace jmayberry.TypewriterHelper {
 
 			instance = this;
 
-			chatBubbleSpawner = new UnitySpawner<ChatBubbleBase<SpeakerType>>(chatBubblePrefab);
-			dialogSequenceSpawner = new CodeSpawner<DialogSequenceBase<SpeakerType>>();
+			chatBubbleSpawner = new UnitySpawner<BaseChat<SpeakerType>>(chatBubblePrefab);
 		}
 
-		private void OnEnable() {
+		protected virtual void OnEnable() {
 			TypewriterDatabase.Instance.AddListener(this.HandleTypewriterEvent);
 		}
 
-		private void OnDisable() {
+		protected virtual void OnDisable() {
 			TypewriterDatabase.Instance.RemoveListener(this.HandleTypewriterEvent);
 		}
+
+		protected internal abstract BaseChatSequence<SpeakerType> SpawnDialogSequence();
+
+		protected internal abstract void DespawnDialogSequence(BaseChatSequence<SpeakerType> spawnling);
 
 		public int GetFact(ITypewriterContext context, EntryReference factReference) {
 			factReference.TryGetEntry(out FactEntry factEntry);
@@ -146,13 +148,13 @@ namespace jmayberry.TypewriterHelper {
 				return false;
 			}
 
-			if (this.isSequenceRunning && (this.currentSequence is DialogSequenceBase<SpeakerType> currentDialogSequence)) {
+			if (this.isSequenceRunning && (this.currentSequence is BaseChatSequence<SpeakerType> currentDialogSequence)) {
 				if (!currentDialogSequence.ShouldOverride(eventEntry)) {
 					return false;
 				}
 			}
 
-			DialogSequenceBase<SpeakerType> dialogSequence = dialogSequenceSpawner.Spawn();
+			BaseChatSequence<SpeakerType> dialogSequence = this.SpawnDialogSequence();
 			dialogSequence.rootEntry = eventEntry;
 			dialogSequence.Reset();
 
