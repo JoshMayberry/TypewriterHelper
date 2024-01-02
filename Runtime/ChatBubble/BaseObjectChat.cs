@@ -20,6 +20,10 @@ namespace jmayberry.TypewriterHelper {
 		Center,
 	}
 
+	/**
+	 * This kind of chat bubble exists in world space and follows the speaker.
+	 * When the chat is over, the bubble despawns.
+	 */
 	[Serializable]
 	public abstract class BaseObjectChat<SpeakerType> : BaseChat<SpeakerType> where SpeakerType : Enum {
 		[Header("Object: Setup")]
@@ -35,7 +39,10 @@ namespace jmayberry.TypewriterHelper {
 		[Required][SerializeField] protected float maxTextSize = 12f;
 		[Required][SerializeField] protected bool constrainOnScreen = true;
 
-		public override void SoftReset(Transform newPosition = null) {
+		[Header("Object: Debug")]
+        [Readonly][SerializeField] protected internal ObjectChatBubbleInfo chatBubbleInfo;
+
+        public override void SoftReset(Transform newPosition = null) {
 			this.backgroundSpriteRenderer.transform.localPosition = Vector3.zero;
 			this.iconSpriteRenderer.transform.localPosition = Vector3.zero;
 			base.SoftReset(newPosition);
@@ -51,7 +58,17 @@ namespace jmayberry.TypewriterHelper {
 			BaseDialogManager<SpeakerType>.instance.EventUpdateBubblePosition.RemoveListener(this.UpdatePosition);
 		}
 
-		protected override void SetSpriteActive(bool state) {
+        protected override void SetChatBubbleInfo(Speaker<SpeakerType> speaker) {
+			var fallbackChatBubbleInfo = ObjectDialogManager<SpeakerType>.instanceObject.fallbackChatBubbleInfo;
+
+            if (speaker == null) {
+				this.chatBubbleInfo = fallbackChatBubbleInfo;
+            } else {
+                this.chatBubbleInfo = ObjectDialogManager<SpeakerType>.instanceObject.chatBubbleInfo.GetValueOrDefault(speaker.speakerType, fallbackChatBubbleInfo);
+            }
+        }
+
+        protected override void SetSpriteActive(bool state) {
 			this.iconSpriteRenderer.gameObject.SetActive(state);
 			this.backgroundSpriteRenderer.gameObject.SetActive(state);
 		}
@@ -60,7 +77,7 @@ namespace jmayberry.TypewriterHelper {
 			this.backgroundSpriteRenderer.size = newSize;
 		}
 
-		protected override Vector2 GetContainerScale() {
+		protected virtual Vector2 GetContainerScale() {
 			return this.backgroundSpriteRenderer.transform.localScale;
 		}
 

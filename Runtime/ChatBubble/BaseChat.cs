@@ -17,8 +17,7 @@ namespace jmayberry.TypewriterHelper {
 		Quiet,
 	}
 
-
-	[Serializable]
+    [Serializable]
 	public abstract class BaseChat<SpeakerType> : MonoBehaviour, ISpawnable where SpeakerType : Enum {
 		[Header("Object: Setup")]
 		[Required][SerializeField] protected TMP_Text dialogText;
@@ -39,7 +38,6 @@ namespace jmayberry.TypewriterHelper {
 		[Readonly][SerializeField] protected internal Speaker<SpeakerType> currentSpeaker;
 		[Readonly][SerializeField] protected internal DialogEntry currentEntry;
 		[Readonly][SerializeField] protected internal DialogContext currentContext;
-		[Readonly][SerializeField] protected internal ChatBubbleInfo chatBubbleInfo;
 		[Readonly][SerializeField] protected DialogOption currentDialogOption;
 		[Readonly][SerializeField] protected ChatBubbleType currentChatBubbleType;
 		[Readonly][SerializeField] protected UnitySpawner<BaseChat<SpeakerType>> spawner;
@@ -55,7 +53,7 @@ namespace jmayberry.TypewriterHelper {
 			this.currentProgress = 0f;
 			this.currentContext = null;
 			this.currentSpeaker = null;
-			this.chatBubbleInfo = null;
+			this.SetChatBubbleInfo(null);
 
 			this.dialogText.text = "";
 			this.speakerText.text = "";
@@ -72,8 +70,7 @@ namespace jmayberry.TypewriterHelper {
 			}
 
 			this.SoftReset();
-			this.chatBubbleInfo = BaseDialogManager<SpeakerType>.instance.fallbackChatBubbleInfo;
-		}
+        }
 
 		public virtual void OnDespawn(object spawner) {
 			this.spawner = null;
@@ -126,12 +123,18 @@ namespace jmayberry.TypewriterHelper {
 
 		protected virtual bool UpdateSpeaker_updateChatBubbleInfo(Speaker<SpeakerType> newSpeaker) {
 			if ((newSpeaker == null) || !newSpeaker.IsDifferent(this.currentSpeaker)) {
-				return true;
+				return this.UpdateSpeaker_noNewSpeaker();
 			}
 
-			this.chatBubbleInfo = BaseDialogManager<SpeakerType>.instance.chatBubbleInfo.GetValueOrDefault(newSpeaker.speakerType, BaseDialogManager<SpeakerType>.instance.fallbackChatBubbleInfo);
+			this.SetChatBubbleInfo(newSpeaker);
 			return this.UpdateSprites(default);
 		}
+
+		protected virtual bool UpdateSpeaker_noNewSpeaker() {
+			return true;
+		}
+
+        protected abstract void SetChatBubbleInfo(Speaker<SpeakerType> speaker);
 
 		protected virtual bool UpdateSprites(DialogOption newOption) {
 			this.currentDialogOption = newOption;
@@ -219,8 +222,6 @@ namespace jmayberry.TypewriterHelper {
 		protected abstract Vector2 GetContainerTargetSize();
 
 		protected abstract void UpdateContainerSize(Vector2 newSize);
-
-		protected abstract Vector2 GetContainerScale();
 
 		protected virtual void UpdateTextProgress_PrepareText() {
 			int textLength = Mathf.Max(0, Mathf.FloorToInt(this.currentText.Length * this.currentProgress));

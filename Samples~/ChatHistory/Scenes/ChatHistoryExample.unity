@@ -512,7 +512,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   testConversation:
-    InternalID: 3866847
+    InternalID: 3866871
 --- !u!1001 &621904832
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1173,13 +1173,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isOverriding: 0
   isSequenceRunning: 0
+  fallbackSpeakerReference:
+    InternalID: 3866865
+  InteractionCooldown: 0.1
+  lastInteractionTime: 0
+  UpdatePositionCooldown: 0.1
+  lastUpdatePositionTime: 0
+  EventUserInteractedWithDialog:
+    m_PersistentCalls:
+      m_Calls: []
+  EventUpdateBubblePosition:
+    m_PersistentCalls:
+      m_Calls: []
+  chatBubblePrefab: {fileID: 891455586520763596, guid: 85ab315ce31a3284e8fb81f046700d4f, type: 3}
+  chatBubbleContainerToHide: {fileID: 1749501106}
+  chatBubbleContainer: {fileID: 1667144830}
+  chatBubbleContainerRectTransform: {fileID: 0}
   chatBubbleInfo:
     _serializedList:
     - Key: 0
       Value:
         fallbackBackground: {fileID: -1179940737, guid: faa21fede24cdbd4b94bd8ea9c9c7fca, type: 3}
         fallbackIconSprite: {fileID: 1207813598, guid: d42f767ef61e6de4585fb16f55295855, type: 3}
-        fallbackPointToSpeakerSprite: {fileID: 1087955862, guid: d296b4ecaf0ee5a42b5984fae9f007ce, type: 3}
         iconSprite:
           _serializedList:
           - Key: 0
@@ -1201,14 +1216,11 @@ MonoBehaviour:
           - Key: 401
             Value: {fileID: 1310214020, guid: d42f767ef61e6de4585fb16f55295855, type: 3}
         backgroundSprite:
-          _serializedList: []
-        pointToSpeakerSprite:
           _serializedList: []
     - Key: 1
       Value:
         fallbackBackground: {fileID: -1179940737, guid: faa21fede24cdbd4b94bd8ea9c9c7fca, type: 3}
         fallbackIconSprite: {fileID: 1207813598, guid: d42f767ef61e6de4585fb16f55295855, type: 3}
-        fallbackPointToSpeakerSprite: {fileID: 0}
         iconSprite:
           _serializedList:
           - Key: 0
@@ -1231,13 +1243,10 @@ MonoBehaviour:
             Value: {fileID: 1310214020, guid: d42f767ef61e6de4585fb16f55295855, type: 3}
         backgroundSprite:
           _serializedList: []
-        pointToSpeakerSprite:
-          _serializedList: []
     - Key: 2
       Value:
         fallbackBackground: {fileID: -905072904, guid: faa21fede24cdbd4b94bd8ea9c9c7fca, type: 3}
         fallbackIconSprite: {fileID: 1773175152, guid: d42f767ef61e6de4585fb16f55295855, type: 3}
-        fallbackPointToSpeakerSprite: {fileID: 0}
         iconSprite:
           _serializedList:
           - Key: 0
@@ -1260,13 +1269,10 @@ MonoBehaviour:
             Value: {fileID: 1322314958, guid: d42f767ef61e6de4585fb16f55295855, type: 3}
         backgroundSprite:
           _serializedList: []
-        pointToSpeakerSprite:
-          _serializedList: []
     - Key: 3
       Value:
         fallbackBackground: {fileID: -1819183423, guid: faa21fede24cdbd4b94bd8ea9c9c7fca, type: 3}
         fallbackIconSprite: {fileID: -1306326633, guid: d42f767ef61e6de4585fb16f55295855, type: 3}
-        fallbackPointToSpeakerSprite: {fileID: 0}
         iconSprite:
           _serializedList:
           - Key: 0
@@ -1289,12 +1295,9 @@ MonoBehaviour:
             Value: {fileID: 1594718089, guid: d42f767ef61e6de4585fb16f55295855, type: 3}
         backgroundSprite:
           _serializedList: []
-        pointToSpeakerSprite:
-          _serializedList: []
   fallbackChatBubbleInfo:
     fallbackBackground: {fileID: -1179940737, guid: faa21fede24cdbd4b94bd8ea9c9c7fca, type: 3}
     fallbackIconSprite: {fileID: 1207813598, guid: d42f767ef61e6de4585fb16f55295855, type: 3}
-    fallbackPointToSpeakerSprite: {fileID: 1087955862, guid: d296b4ecaf0ee5a42b5984fae9f007ce, type: 3}
     iconSprite:
       _serializedList:
       - Key: 0
@@ -1325,24 +1328,6 @@ MonoBehaviour:
         Value: {fileID: -1179940737, guid: faa21fede24cdbd4b94bd8ea9c9c7fca, type: 3}
       - Key: 3
         Value: {fileID: -1179940737, guid: faa21fede24cdbd4b94bd8ea9c9c7fca, type: 3}
-    pointToSpeakerSprite:
-      _serializedList: []
-  chatBubblePrefab: {fileID: 891455586520763596, guid: 85ab315ce31a3284e8fb81f046700d4f, type: 3}
-  fallbackSpeakerReference:
-    InternalID: 3866841
-  InteractionCooldown: 0.1
-  lastInteractionTime: 0
-  UpdatePositionCooldown: 0.1
-  lastUpdatePositionTime: 0
-  EventUserInteractedWithDialog:
-    m_PersistentCalls:
-      m_Calls: []
-  EventUpdateBubblePosition:
-    m_PersistentCalls:
-      m_Calls: []
-  chatBubbleContainerToHide: {fileID: 1749501106}
-  chatBubbleContainer: {fileID: 1667144830}
-  chatBubbleContainerRectTransform: {fileID: 0}
 --- !u!1 &1235741846
 GameObject:
   m_ObjectHideFlags: 0
@@ -2079,7 +2064,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1749501106}
-  - component: {fileID: 1749501110}
   - component: {fileID: 1749501109}
   - component: {fileID: 1749501108}
   - component: {fileID: 1749501107}
@@ -2180,18 +2164,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1749501105}
   m_CullTransparentMesh: 1
---- !u!114 &1749501110
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1749501105}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9a3b107f241d78b41bbd9735ed7d3505, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1879599299
 GameObject:
   m_ObjectHideFlags: 0
@@ -2369,8 +2341,8 @@ MonoBehaviour:
   speakerType: 2
   displayName: Small Slime
   speakerReference:
-  - InternalID: 3866845
-  - InternalID: 3866846
+  - InternalID: 3866864
+  - InternalID: 3866865
   speed: 5
 --- !u!1001 &2131181179
 PrefabInstance:
@@ -2490,6 +2462,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5088781488546223987, guid: a33be6ca0ce89f340b73b034dab0f2c8, type: 3}
+      propertyPath: speakerReference.Array.data[0].InternalID
+      value: 3866870
+      objectReference: {fileID: 0}
     - target: {fileID: 5507121238873676244, guid: a33be6ca0ce89f340b73b034dab0f2c8, type: 3}
       propertyPath: m_Name
       value: Skeleton

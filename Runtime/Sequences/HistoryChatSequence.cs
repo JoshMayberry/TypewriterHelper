@@ -64,7 +64,7 @@ namespace jmayberry.TypewriterHelper {
 		}
 
 		public override IEnumerator OnCancel() {
-			HistoryDialogManager<SpeakerType>.dialogSequenceSpawner.Despawn(this);
+			this.Despawn();
 			yield return base.OnCancel();
 		}
 	}

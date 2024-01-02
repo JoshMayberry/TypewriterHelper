@@ -29,19 +29,15 @@ namespace jmayberry.TypewriterHelper {
 	}
 
 	[Serializable]
-	public class ChatBubbleInfo {
+	public class BaseChatBubbleInfo {
 		[Required] public Sprite fallbackBackground;
 		[Required] public Sprite fallbackIconSprite;
-		[Required] public Sprite fallbackPointToSpeakerSprite;
 		[SerializedDictionary("Dialog Option", "Icon")] public SerializedDictionary<DialogOption, Sprite> iconSprite;
 		[SerializedDictionary("Chat Type", "Background")] public SerializedDictionary<ChatBubbleType, Sprite> backgroundSprite;
-		[SerializedDictionary("Chat Type", "Pointer")] public SerializedDictionary<ChatBubbleType, Sprite> pointToSpeakerSprite;
 	}
+
 	public abstract class BaseDialogManager<SpeakerType> : EventManagerBase where SpeakerType : Enum {
 		[Header("Base: Setup")]
-		[SerializedDictionary("Speaker Type", "Chat Bubble")] public SerializedDictionary<SpeakerType, ChatBubbleInfo> chatBubbleInfo = new SerializedDictionary<SpeakerType, ChatBubbleInfo>();
-		public ChatBubbleInfo fallbackChatBubbleInfo;
-		[Required][SerializeField] private BaseChat<SpeakerType> chatBubblePrefab;
 		[EntryFilter(Variant = EntryVariant.Fact)] public EntryReference fallbackSpeakerReference;
 
 		[Header("Base: Tweak")]
@@ -72,8 +68,6 @@ namespace jmayberry.TypewriterHelper {
 			}
 
 			instance = this;
-
-			chatBubbleSpawner = new UnitySpawner<BaseChat<SpeakerType>>(chatBubblePrefab);
 		}
 
 		protected virtual void OnEnable() {
@@ -159,7 +153,7 @@ namespace jmayberry.TypewriterHelper {
 			return true;
 		}
 
-		internal void HandleTypewriterEvent(BaseEntry entry, ITypewriterContext iContext) {
+		protected virtual void HandleTypewriterEvent(BaseEntry entry, ITypewriterContext iContext) {
 			if (iContext is not DialogContext dialogContext) {
 				Debug.LogError($"Unknown context type {iContext}");
 				return;

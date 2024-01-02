@@ -17,13 +17,21 @@ using jmayberry.EventSequencer;
 using jmayberry.Spawner;
 
 namespace jmayberry.TypewriterHelper {
-	public class HistoryDialogManager<SpeakerType> : BaseDialogManager<SpeakerType> where SpeakerType : Enum {
+    [Serializable]
+    public class HistoryChatBubbleInfo : BaseChatBubbleInfo { }
+
+    public class HistoryDialogManager<SpeakerType> : BaseDialogManager<SpeakerType> where SpeakerType : Enum {
 		[Header("History: Setup")]
-		[Required][SerializeField] public RectTransform chatBubbleContainerToHide;
+		[Required][SerializeField] protected BaseChat<SpeakerType> chatBubblePrefab;
+        [Required][SerializeField] public RectTransform chatBubbleContainerToHide;
 		[Required][SerializeField] public VerticalLayoutGroup chatBubbleContainer;
         [Readonly][SerializeField] public RectTransform chatBubbleContainerRectTransform;
 
+        [SerializedDictionary("Speaker Type", "Chat Bubble")] public SerializedDictionary<SpeakerType, HistoryChatBubbleInfo> chatBubbleInfo = new SerializedDictionary<SpeakerType, HistoryChatBubbleInfo>();
+        public HistoryChatBubbleInfo fallbackChatBubbleInfo;
+
         protected internal static CodeSpawner<HistoryChatSequence<SpeakerType>> dialogSequenceSpawner;
+
 		public static HistoryDialogManager<SpeakerType> instanceHistory { get; private set; }
 
 		protected override void Awake() {
@@ -38,9 +46,11 @@ namespace jmayberry.TypewriterHelper {
 			instanceHistory = this;
 
 			dialogSequenceSpawner = new CodeSpawner<HistoryChatSequence<SpeakerType>>();
+			chatBubbleSpawner = new UnitySpawner<BaseChat<SpeakerType>>(chatBubblePrefab);
+
 			this.chatBubbleContainerRectTransform = this.chatBubbleContainer.GetComponent<RectTransform>();
 
-			this.HideChat();
+            this.HideChat();
         }
 
 		protected override BaseChatSequence<SpeakerType> SpawnDialogSequence() {
