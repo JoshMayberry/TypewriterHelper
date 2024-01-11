@@ -17,8 +17,8 @@ namespace jmayberry.TypewriterHelper {
 		Quiet,
 	}
 
-    [Serializable]
-	public abstract class BaseChat<SpeakerType> : MonoBehaviour, ISpawnable where SpeakerType : Enum {
+	[Serializable]
+	public abstract class BaseChat<SpeakerType, EmotionType> : MonoBehaviour, ISpawnable where SpeakerType : Enum where EmotionType : Enum {
 		[Header("Object: Setup")]
 		[Required][SerializeField] protected TMP_Text dialogText;
 		[Required][SerializeField] protected TMP_Text speakerText;
@@ -34,13 +34,16 @@ namespace jmayberry.TypewriterHelper {
 		[Header("Base: Debug")]
 		[Readonly][SerializeField] protected bool isUserInteracted;
 		[Readonly][SerializeField] protected string currentText;
+		[Readonly][SerializeField] protected internal int currentTextLength;
 		[Readonly][SerializeField] protected internal float currentProgress;
-		[Readonly][SerializeField] protected internal Speaker<SpeakerType> currentSpeaker;
-		[Readonly][SerializeField] protected internal DialogEntry currentEntry;
+		[Readonly][SerializeField] protected internal Speaker<SpeakerType, EmotionType> currentSpeaker;
+		[Readonly][SerializeField] protected internal BaseDialogEntry<EmotionType> currentEntry;
+		[Readonly][SerializeField] protected internal EmotionType currentEmotion;
 		[Readonly][SerializeField] protected internal DialogContext currentContext;
+		[Readonly][SerializeField] protected internal BaseSpeakerVoice currentVoice;
 		[Readonly][SerializeField] protected DialogOption currentDialogOption;
 		[Readonly][SerializeField] protected ChatBubbleType currentChatBubbleType;
-		[Readonly][SerializeField] protected UnitySpawner<BaseChat<SpeakerType>> spawner;
+		[Readonly][SerializeField] protected UnitySpawner<BaseChat<SpeakerType, EmotionType>> spawner;
 
 		public virtual void SoftReset(Transform newPosition = null) {
 			if (newPosition != null) {
@@ -62,7 +65,7 @@ namespace jmayberry.TypewriterHelper {
 		}
 
 		public virtual void OnSpawn(object spawner) {
-			if (spawner is UnitySpawner<BaseChat<SpeakerType>> sequenceSpawner) {
+			if (spawner is UnitySpawner<BaseChat<SpeakerType, EmotionType>> sequenceSpawner) {
 				this.spawner = sequenceSpawner;
 			}
 			else {
@@ -70,7 +73,7 @@ namespace jmayberry.TypewriterHelper {
 			}
 
 			this.SoftReset();
-        }
+		}
 
 		public virtual void OnDespawn(object spawner) {
 			this.spawner = null;
@@ -86,7 +89,7 @@ namespace jmayberry.TypewriterHelper {
 		}
 
 		protected virtual bool UpdateSpeaker() {
-			Speaker<SpeakerType> newSpeaker = BaseDialogManager<SpeakerType>.instance.LookupSpeaker(this.currentEntry);
+			Speaker<SpeakerType, EmotionType> newSpeaker = BaseDialogManager<SpeakerType, EmotionType>.instance.LookupSpeaker(this.currentEntry);
 			if (newSpeaker == null) {
 				Debug.LogError($"Cannot find speaker in scene; {this.currentEntry.Speaker.DisplayName}");
 				return false;
@@ -95,7 +98,7 @@ namespace jmayberry.TypewriterHelper {
 			return UpdateSpeaker(newSpeaker);
 		}
 
-		protected virtual bool UpdateSpeaker(Speaker<SpeakerType> newSpeaker) {
+		protected virtual bool UpdateSpeaker(Speaker<SpeakerType, EmotionType> newSpeaker) {
 			if (newSpeaker == null) {
 				Debug.LogError($"No speaker given");
 				return false;
@@ -108,12 +111,15 @@ namespace jmayberry.TypewriterHelper {
 				return false;
 			}
 
+			this.currentVoice = this.UpdateSpeaker_getSpeakerVoice(newSpeaker);
+			this.currentVoice.NewConversation();
+
 			this.currentSpeaker = newSpeaker;
 			return true;
 		}
 
 
-		protected virtual string UpdateSpeaker_getSpeakerName(Speaker<SpeakerType> newSpeaker) {
+		protected virtual string UpdateSpeaker_getSpeakerName(Speaker<SpeakerType, EmotionType> newSpeaker) {
 			if ((this.currentEntry != null) && !string.IsNullOrEmpty(this.currentEntry.Speaker.DisplayName)) {
 				return this.currentEntry.Speaker.DisplayName;
 			}
@@ -121,7 +127,7 @@ namespace jmayberry.TypewriterHelper {
 			return this.fallbackSpeakerName;
 		}
 
-		protected virtual bool UpdateSpeaker_updateChatBubbleInfo(Speaker<SpeakerType> newSpeaker) {
+		protected virtual bool UpdateSpeaker_updateChatBubbleInfo(Speaker<SpeakerType, EmotionType> newSpeaker) {
 			if ((newSpeaker == null) || !newSpeaker.IsDifferent(this.currentSpeaker)) {
 				return this.UpdateSpeaker_noNewSpeaker();
 			}
@@ -134,7 +140,9 @@ namespace jmayberry.TypewriterHelper {
 			return true;
 		}
 
-        protected abstract void SetChatBubbleInfo(Speaker<SpeakerType> speaker);
+		protected abstract BaseSpeakerVoice UpdateSpeaker_getSpeakerVoice(Speaker<SpeakerType, EmotionType> newSpeaker);
+
+		protected abstract void SetChatBubbleInfo(Speaker<SpeakerType, EmotionType> speaker);
 
 		protected virtual bool UpdateSprites(DialogOption newOption) {
 			this.currentDialogOption = newOption;
@@ -143,19 +151,19 @@ namespace jmayberry.TypewriterHelper {
 
 		protected abstract bool UpdateSprites();
 
-		public virtual IEnumerator Populate(DialogContext dialogContext, DialogEntry dialogEntry) {
-            yield return this.Populate_PreLoop(dialogContext, dialogEntry);
+		public virtual IEnumerator Populate(DialogContext dialogContext, BaseDialogEntry<EmotionType> BaseDialogEntry) {
+			yield return this.Populate_PreLoop(dialogContext, BaseDialogEntry);
 
-            int i = 0;
-			int i_lastOne = dialogEntry.TextList.Length - 1;
+			int i = 0;
+			int i_lastOne = BaseDialogEntry.TextList.Length - 1;
 			bool isLastInSequence = !this.currentContext.HasMatchingRule(this.currentEntry.ID);
 
-            foreach (string dialog in dialogEntry.TextList) {
+			foreach (string dialog in BaseDialogEntry.TextList) {
 				this.isUserInteracted = false;
 				bool isLastInLoop = (i >= i_lastOne);
-                yield return this.Populate_Loop(dialogContext, dialogEntry, dialog, i, isLastInLoop, isLastInSequence);
+				yield return this.Populate_Loop(dialogContext, BaseDialogEntry, dialog, i, isLastInLoop, isLastInSequence);
 
-                this.isUserInteracted = false;
+				this.isUserInteracted = false;
 				yield return new WaitUntil(() => this.isUserInteracted);
 				i++;
 			}
@@ -163,17 +171,18 @@ namespace jmayberry.TypewriterHelper {
 			this.isUserInteracted = false;
 		}
 
-		protected internal virtual IEnumerator Populate_PreLoop(DialogContext dialogContext, DialogEntry dialogEntry) {
-            this.currentEntry = dialogEntry;
-            this.currentContext = dialogContext;
-            this.currentChatBubbleType = dialogEntry.chatKind;
+		protected internal virtual IEnumerator Populate_PreLoop(DialogContext dialogContext, BaseDialogEntry<EmotionType> BaseDialogEntry) {
+			this.currentEntry = BaseDialogEntry;
+			this.currentEmotion = currentEntry.emotion;
+			this.currentContext = dialogContext;
+			this.currentChatBubbleType = BaseDialogEntry.chatKind;
 
-            if (!UpdateSpeaker()) {
-                yield break;
-            }
+			if (!UpdateSpeaker()) {
+				yield break;
+			}
 
-            yield return this.Show();
-        }
+			yield return this.Show();
+		}
 
 		protected virtual IEnumerator Populate_PrepareText(string dialog) {
 			if (this.currentText != "") {
@@ -192,11 +201,11 @@ namespace jmayberry.TypewriterHelper {
 			}
 		}
 
-		public virtual IEnumerator Populate_Loop(DialogContext dialogContext, DialogEntry dialogEntry, string dialog, int i, bool isLastInLoop, bool isLastInSequence) {
-            yield return this.Populate_PrepareText(dialog);
-            yield return this.Populate_DisplayOverTime(dialogEntry.Speed);
-            this.Populate_Finished(isLastInLoop, isLastInSequence);
-        }
+		public virtual IEnumerator Populate_Loop(DialogContext dialogContext, BaseDialogEntry<EmotionType> BaseDialogEntry, string dialog, int i, bool isLastInLoop, bool isLastInSequence) {
+			yield return this.Populate_PrepareText(dialog);
+			yield return this.Populate_DisplayOverTime(BaseDialogEntry.Speed);
+			this.Populate_Finished(isLastInLoop, isLastInSequence);
+		}
 
 		protected virtual void Populate_Finished(bool isLastInLoop, bool isLastInSequence) {
 			this.UpdateTextProgress(1);
@@ -213,6 +222,7 @@ namespace jmayberry.TypewriterHelper {
 		internal virtual void UpdateTextProgress(float progress) {
 			this.currentProgress = progress;
 			this.UpdateTextProgress_PrepareText();
+			this.UpdateTextProgress_PlaySound();
 
 			if (this.growWithText) {
 				this.UpdateContainerSize(this.GetContainerTargetSize());
@@ -224,15 +234,35 @@ namespace jmayberry.TypewriterHelper {
 		protected abstract void UpdateContainerSize(Vector2 newSize);
 
 		protected virtual void UpdateTextProgress_PrepareText() {
-			int textLength = Mathf.Max(0, Mathf.FloorToInt(this.currentText.Length * this.currentProgress));
+			this.currentTextLength = Mathf.Max(0, Mathf.FloorToInt(this.currentText.Length * this.currentProgress));
 			if (this.growWithText) {
-				this.dialogText.text = this.currentText[..textLength];
+				this.dialogText.text = this.currentText[..this.currentTextLength];
 				this.dialogText.ForceMeshUpdate(); // Ensure text renders this frame so we can get the size
 			}
 			else {
 				// See: https://github.com/aarthificial-unity/foundations/blob/7d43e288317085920a55ea61c09bf30f3371b33c/Assets/View/Dialogue/DialogueBubble.cs#L122
-				this.dialogText.maxVisibleCharacters = textLength;
+				this.dialogText.maxVisibleCharacters = this.currentTextLength;
 			}
+		}
+
+		protected virtual char UpdateTextProgress_GetCurrentCharacter() {
+			if (this.currentTextLength == 0) {
+				return '\0';
+			}
+
+			if (this.growWithText) {
+				return this.dialogText.text[this.currentTextLength - 1];
+			}
+			
+			return this.currentText[Mathf.Min(this.currentTextLength, this.currentText.Length) - 1];
+		}
+
+		protected virtual void UpdateTextProgress_PlaySound() {
+			if (this.currentVoice == null) {
+				return;
+			}
+
+			this.currentVoice.PlaySound(this.currentTextLength, this.UpdateTextProgress_GetCurrentCharacter());
 		}
 
 		public virtual IEnumerator Show() {

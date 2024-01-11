@@ -16,15 +16,28 @@ using jmayberry.Spawner;
 using UnityEngine.Events;
 
 namespace jmayberry.TypewriterHelper.Samples.ChatHistory {
-	public enum MySpeakerType {
-		Unknown,
-		System,
-		Slime,
-		Skeleton,
-	}
+	[RequireComponent(typeof(AudioSource))]
+	public class DialogManager : HistoryDialogManager<MySpeakerType, MyEmotionType> {
+		public AudioSource audioSource;
 
-	public class DialogManager : HistoryDialogManager<MySpeakerType> {
-        private void Update() {
+		public static DialogManager myInstance { get; private set; }
+
+		protected override void Awake() {
+			base.Awake();
+
+			if (myInstance != null && myInstance != this) {
+				Debug.LogError("Found more than one DialogManager in the scene.");
+				Destroy(this.gameObject);
+				return;
+			}
+
+			myInstance = this;
+
+			this.audioSource = GetComponent<AudioSource>();
+
+		}
+
+		private void Update() {
 			if (Input.GetKeyDown("space")) {
 				this.EventUserInteractedWithDialog.Invoke();
 			}

@@ -15,12 +15,12 @@ using jmayberry.EventSequencer;
 using jmayberry.Spawner;
 
 namespace jmayberry.TypewriterHelper {
-	public class HistoryChatSequence<SpeakerType> : BaseChatSequence<SpeakerType> where SpeakerType : Enum {
-		[Readonly][SerializeField] protected CodeSpawner<HistoryChatSequence<SpeakerType>> spawner;
+	public class HistoryChatSequence<SpeakerType, EmotionType> : BaseChatSequence<SpeakerType, EmotionType> where SpeakerType : Enum where EmotionType : Enum {
+		[Readonly][SerializeField] protected CodeSpawner<HistoryChatSequence<SpeakerType, EmotionType>> spawner;
 		public override void OnSpawn(object spawner) {
 			base.OnSpawn(spawner);
 
-			if (spawner is CodeSpawner<HistoryChatSequence<SpeakerType>> sequenceSpawner) {
+			if (spawner is CodeSpawner<HistoryChatSequence<SpeakerType, EmotionType>> sequenceSpawner) {
 				this.spawner = sequenceSpawner;
 			}
 			else {
@@ -43,13 +43,13 @@ namespace jmayberry.TypewriterHelper {
 		}
 
 		public override IEnumerator Start_Pre(DialogContext dialogContext) {
-			HistoryDialogManager<SpeakerType>.instance.EventUserInteractedWithDialog.AddListener(this.OnUserInteracted);
-			HistoryDialogManager<SpeakerType>.instanceHistory.ShowChat();
+			HistoryDialogManager<SpeakerType, EmotionType>.instance.EventUserInteractedWithDialog.AddListener(this.OnUserInteracted);
+			HistoryDialogManager<SpeakerType, EmotionType>.instanceHistory.ShowChat();
 			yield return null;
 		}
 
 		public override IEnumerator Start_Post(DialogContext dialogContext) {
-			HistoryDialogManager<SpeakerType>.instanceHistory.HideChat();
+			HistoryDialogManager<SpeakerType, EmotionType>.instanceHistory.HideChat();
 			yield return null;
 		}
 
@@ -58,7 +58,7 @@ namespace jmayberry.TypewriterHelper {
 				this.chatBubble.SetOpacity(0.6f);
 			}
 
-			this.chatBubble = HistoryDialogManager<SpeakerType>.chatBubbleSpawner.Spawn();
+			this.chatBubble = HistoryDialogManager<SpeakerType, EmotionType>.chatBubbleSpawner.Spawn();
 
 			yield return base.HandleCurrentEntry(dialogContext, baseEntry);
 		}

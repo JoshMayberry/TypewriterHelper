@@ -15,41 +15,41 @@ using jmayberry.EventSequencer;
 using jmayberry.Spawner;
 
 namespace jmayberry.TypewriterHelper {
-	public class ObjectChatSequence<SpeakerType> : BaseChatSequence<SpeakerType> where SpeakerType : Enum {
-        [Readonly][SerializeField] protected CodeSpawner<ObjectChatSequence<SpeakerType>> spawner;
-        public override void OnSpawn(object spawner) {
-            base.OnSpawn(spawner);
+	public class ObjectChatSequence<SpeakerType, EmotionType> : BaseChatSequence<SpeakerType, EmotionType> where SpeakerType : Enum where EmotionType : Enum {
+		[Readonly][SerializeField] protected CodeSpawner<ObjectChatSequence<SpeakerType, EmotionType>> spawner;
+		public override void OnSpawn(object spawner) {
+			base.OnSpawn(spawner);
 
-            if (spawner is CodeSpawner<ObjectChatSequence<SpeakerType>> sequenceSpawner) {
-                this.spawner = sequenceSpawner;
-            }
-            else {
-                Debug.LogError($"Unknown spawner type {spawner}");
-            }
-        }
+			if (spawner is CodeSpawner<ObjectChatSequence<SpeakerType, EmotionType>> sequenceSpawner) {
+				this.spawner = sequenceSpawner;
+			}
+			else {
+				Debug.LogError($"Unknown spawner type {spawner}");
+			}
+		}
 
-        public override void OnDespawn(object spawner) {
-            base.OnDespawn(spawner);
-            this.spawner = null;
+		public override void OnDespawn(object spawner) {
+			base.OnDespawn(spawner);
+			this.spawner = null;
 
-            if (this.chatBubble != null) {
-                BaseDialogManager<SpeakerType>.instance.StartCoroutine(this.chatBubble.DespawnCoroutine());
-                this.chatBubble = null;
-            }
-        }
+			if (this.chatBubble != null) {
+				BaseDialogManager<SpeakerType, EmotionType>.instance.StartCoroutine(this.chatBubble.DespawnCoroutine());
+				this.chatBubble = null;
+			}
+		}
 
-        public virtual void Despawn() {
-            if (this.spawner != null) {
-                this.spawner.Despawn(this);
-            }
-            else {
-                Debug.LogError("Spawner not set");
-            }
-        }
+		public virtual void Despawn() {
+			if (this.spawner != null) {
+				this.spawner.Despawn(this);
+			}
+			else {
+				Debug.LogError("Spawner not set");
+			}
+		}
 
-        public override IEnumerator Start_Pre(DialogContext dialogContext) {
-			ObjectDialogManager<SpeakerType>.instance.EventUserInteractedWithDialog.AddListener(this.OnUserInteracted);
-			this.chatBubble = ObjectDialogManager<SpeakerType>.chatBubbleSpawner.Spawn();
+		public override IEnumerator Start_Pre(DialogContext dialogContext) {
+			ObjectDialogManager<SpeakerType, EmotionType>.instance.EventUserInteractedWithDialog.AddListener(this.OnUserInteracted);
+			this.chatBubble = ObjectDialogManager<SpeakerType, EmotionType>.chatBubbleSpawner.Spawn();
 			yield return null;
 		}
 

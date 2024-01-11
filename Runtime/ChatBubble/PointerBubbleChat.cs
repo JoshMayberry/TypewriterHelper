@@ -6,7 +6,7 @@ using jmayberry.CustomAttributes;
 
 namespace jmayberry.TypewriterHelper {
 	[Serializable]
-	public abstract class PointerBubbleChat<SpeakerType> : BaseObjectChat<SpeakerType> where SpeakerType : Enum {
+	public abstract class PointerBubbleChat<SpeakerType, EmotionType> : BaseObjectChat<SpeakerType, EmotionType> where SpeakerType : Enum where EmotionType : Enum {
 		[Header("Pointer: Setup")]
 		[Required][SerializeField] protected SpriteRenderer pointToSpeakerSpriteRenderer;
 

@@ -7,7 +7,7 @@ using jmayberry.TypewriterHelper.Entries;
 
 //namespace Aarthificial.Typewriter.Editor.PropertyDrawers {
 //    /// <summary>
-//    /// A property drawer for <see cref="DialogEntry"/>.
+//    /// A property drawer for <see cref="BaseDialogEntry"/>.
 //    /// </summary>
 //    /// <remarks>
 //    /// The Typewriter editor uses Unity drawers to display the entry details.
@@ -17,10 +17,10 @@ using jmayberry.TypewriterHelper.Entries;
 //    /// drawn by the base drawer, and instead display it as a custom text field on
 //    /// the very top.
 //    /// </remarks>
-//    [CustomPropertyDrawer(typeof(DialogEntry))]
+//    [CustomPropertyDrawer(typeof(BaseDialogEntry))]
 //    public class TextEntryPropertyDrawer : BaseEntryPropertyDrawer {
 //        protected override IEnumerable<string> GetHandledFields() =>
-//          base.GetHandledFields().Append(nameof(DialogEntry.Text));
+//          base.GetHandledFields().Append(nameof(BaseDialogEntry.Text));
 
 //        protected override void PopulateContent(
 //          VisualElement root,
@@ -35,7 +35,7 @@ using jmayberry.TypewriterHelper.Entries;
 //      },
 //            };
 //            text.BindProperty(
-//              property.FindPropertyRelative(nameof(DialogEntry.Text))
+//              property.FindPropertyRelative(nameof(BaseDialogEntry.Text))
 //            );
 
 //            root.Add(text);

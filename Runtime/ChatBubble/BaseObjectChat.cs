@@ -25,7 +25,7 @@ namespace jmayberry.TypewriterHelper {
 	 * When the chat is over, the bubble despawns.
 	 */
 	[Serializable]
-	public abstract class BaseObjectChat<SpeakerType> : BaseChat<SpeakerType> where SpeakerType : Enum {
+	public abstract class BaseObjectChat<SpeakerType, EmotionType> : BaseChat<SpeakerType, EmotionType> where SpeakerType : Enum where EmotionType : Enum {
 		[Header("Object: Setup")]
 		[Required][SerializeField] protected SpriteRenderer iconSpriteRenderer;
 		[Required][SerializeField] protected SpriteRenderer backgroundSpriteRenderer;
@@ -33,16 +33,16 @@ namespace jmayberry.TypewriterHelper {
 
 		[Header("Object: Tweak")]
 		[Required][SerializeField] protected Vector2 speakerNameOffset = new Vector2(-2f, 0f);
-        [Required][SerializeField] protected Vector2 IconOffset = new Vector2(2f, 2f);
+		[Required][SerializeField] protected Vector2 IconOffset = new Vector2(2f, 2f);
 		[Required][SerializeField] protected Vector2 constrainOnScreenPadding = new Vector2(2f, 2f);
 		//[Required][SerializeField] protected float minTextSize = 0f;
 		[Required][SerializeField] protected float maxTextSize = 12f;
 		[Required][SerializeField] protected bool constrainOnScreen = true;
 
 		[Header("Object: Debug")]
-        [Readonly][SerializeField] protected internal ObjectChatBubbleInfo chatBubbleInfo;
+		[Readonly][SerializeField] protected internal ObjectChatBubbleInfo<EmotionType> chatBubbleInfo;
 
-        public override void SoftReset(Transform newPosition = null) {
+		public override void SoftReset(Transform newPosition = null) {
 			this.backgroundSpriteRenderer.transform.localPosition = Vector3.zero;
 			this.iconSpriteRenderer.transform.localPosition = Vector3.zero;
 			base.SoftReset(newPosition);
@@ -50,25 +50,25 @@ namespace jmayberry.TypewriterHelper {
 
 		public override void OnSpawn(object spawner) {
 			base.OnSpawn(spawner);
-			BaseDialogManager<SpeakerType>.instance.EventUpdateBubblePosition.AddListener(this.UpdatePosition);
+			BaseDialogManager<SpeakerType, EmotionType>.instance.EventUpdateBubblePosition.AddListener(this.UpdatePosition);
 		}
 
 		public override void OnDespawn(object spawner) {
 			base.OnDespawn(spawner);
-			BaseDialogManager<SpeakerType>.instance.EventUpdateBubblePosition.RemoveListener(this.UpdatePosition);
+			BaseDialogManager<SpeakerType, EmotionType>.instance.EventUpdateBubblePosition.RemoveListener(this.UpdatePosition);
 		}
 
-        protected override void SetChatBubbleInfo(Speaker<SpeakerType> speaker) {
-			var fallbackChatBubbleInfo = ObjectDialogManager<SpeakerType>.instanceObject.fallbackChatBubbleInfo;
+		protected override void SetChatBubbleInfo(Speaker<SpeakerType, EmotionType> speaker) {
+			var fallbackChatBubbleInfo = ObjectDialogManager<SpeakerType, EmotionType>.instanceObject.fallbackChatBubbleInfo;
 
-            if (speaker == null) {
+			if (speaker == null) {
 				this.chatBubbleInfo = fallbackChatBubbleInfo;
-            } else {
-                this.chatBubbleInfo = ObjectDialogManager<SpeakerType>.instanceObject.chatBubbleInfo.GetValueOrDefault(speaker.speakerType, fallbackChatBubbleInfo);
-            }
-        }
+			} else {
+				this.chatBubbleInfo = ObjectDialogManager<SpeakerType, EmotionType>.instanceObject.chatBubbleInfo.GetValueOrDefault(speaker.speakerType, fallbackChatBubbleInfo);
+			}
+		}
 
-        protected override void SetSpriteActive(bool state) {
+		protected override void SetSpriteActive(bool state) {
 			this.iconSpriteRenderer.gameObject.SetActive(state);
 			this.backgroundSpriteRenderer.gameObject.SetActive(state);
 		}
@@ -79,6 +79,10 @@ namespace jmayberry.TypewriterHelper {
 
 		protected virtual Vector2 GetContainerScale() {
 			return this.backgroundSpriteRenderer.transform.localScale;
+		}
+
+		protected override BaseSpeakerVoice UpdateSpeaker_getSpeakerVoice(Speaker<SpeakerType, EmotionType> newSpeaker) {
+			return this.chatBubbleInfo.speakerVoice.GetValueOrDefault(this.currentEmotion, (newSpeaker.speakerVoice != null ? newSpeaker.speakerVoice : this.chatBubbleInfo.fallbackSpeakerVoice));
 		}
 
 		protected override bool UpdateSprites() {
@@ -118,13 +122,13 @@ namespace jmayberry.TypewriterHelper {
 			}
 		}
 
-        protected override Vector2 GetContainerTargetSize() {
-            Vector2 textSize = this.dialogText.GetRenderedValues(false);
-            Vector2 targetSize = (textSize + this.padding);
-            return new Vector2(Mathf.Max(this.minContainerSize.x, targetSize.x), Mathf.Max(this.minContainerSize.y, targetSize.y)) / this.GetContainerScale();
-        }
+		protected override Vector2 GetContainerTargetSize() {
+			Vector2 textSize = this.dialogText.GetRenderedValues(false);
+			Vector2 targetSize = (textSize + this.padding);
+			return new Vector2(Mathf.Max(this.minContainerSize.x, targetSize.x), Mathf.Max(this.minContainerSize.y, targetSize.y)) / this.GetContainerScale();
+		}
 
-        public virtual void UpdatePosition() {
+		public virtual void UpdatePosition() {
 			if (this.currentSpeaker == null) {
 				return;
 			}

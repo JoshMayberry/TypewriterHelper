@@ -17,73 +17,73 @@ using jmayberry.EventSequencer;
 using jmayberry.Spawner;
 
 namespace jmayberry.TypewriterHelper {
-    [Serializable]
-    public class HistoryChatBubbleInfo : BaseChatBubbleInfo { }
+	[Serializable]
+	public class HistoryChatBubbleInfo<EmotionType> : BaseChatBubbleInfo<EmotionType> where EmotionType : Enum { }
 
-    public class HistoryDialogManager<SpeakerType> : BaseDialogManager<SpeakerType> where SpeakerType : Enum {
+	public class HistoryDialogManager<SpeakerType, EmotionType> : BaseDialogManager<SpeakerType, EmotionType> where SpeakerType : Enum where EmotionType : Enum {
 		[Header("History: Setup")]
-		[Required][SerializeField] protected BaseChat<SpeakerType> chatBubblePrefab;
-        [Required][SerializeField] public RectTransform chatBubbleContainerToHide;
+		[Required][SerializeField] protected BaseChat<SpeakerType, EmotionType> chatBubblePrefab;
+		[Required][SerializeField] public RectTransform chatBubbleContainerToHide;
 		[Required][SerializeField] public VerticalLayoutGroup chatBubbleContainer;
-        [Readonly][SerializeField] public RectTransform chatBubbleContainerRectTransform;
+		[Readonly][SerializeField] public RectTransform chatBubbleContainerRectTransform;
 
-        [SerializedDictionary("Speaker Type", "Chat Bubble")] public SerializedDictionary<SpeakerType, HistoryChatBubbleInfo> chatBubbleInfo = new SerializedDictionary<SpeakerType, HistoryChatBubbleInfo>();
-        public HistoryChatBubbleInfo fallbackChatBubbleInfo;
+		[SerializedDictionary("Speaker Type", "Chat Bubble")] public SerializedDictionary<SpeakerType, HistoryChatBubbleInfo<EmotionType>> chatBubbleInfo = new SerializedDictionary<SpeakerType, HistoryChatBubbleInfo<EmotionType>>();
+		public HistoryChatBubbleInfo<EmotionType> fallbackChatBubbleInfo;
 
-        protected internal static CodeSpawner<HistoryChatSequence<SpeakerType>> dialogSequenceSpawner;
+		protected internal static CodeSpawner<HistoryChatSequence<SpeakerType, EmotionType>> dialogSequenceSpawner;
 
-		public static HistoryDialogManager<SpeakerType> instanceHistory { get; private set; }
+		public static HistoryDialogManager<SpeakerType, EmotionType> instanceHistory { get; private set; }
 
 		protected override void Awake() {
 			base.Awake();
 
 			if (instanceHistory != null && instanceHistory != this) {
-				Debug.LogError("Found more than one HistoryDialogManager<SpeakerType> in the scene.");
+				Debug.LogError("Found more than one HistoryDialogManager<SpeakerType, EmotionType> in the scene.");
 				Destroy(this.gameObject);
 				return;
 			}
 
 			instanceHistory = this;
 
-			dialogSequenceSpawner = new CodeSpawner<HistoryChatSequence<SpeakerType>>();
-			chatBubbleSpawner = new UnitySpawner<BaseChat<SpeakerType>>(chatBubblePrefab);
+			dialogSequenceSpawner = new CodeSpawner<HistoryChatSequence<SpeakerType, EmotionType>>();
+			chatBubbleSpawner = new UnitySpawner<BaseChat<SpeakerType, EmotionType>>(chatBubblePrefab);
 
 			this.chatBubbleContainerRectTransform = this.chatBubbleContainer.GetComponent<RectTransform>();
 
-            this.HideChat();
-        }
+			this.HideChat();
+		}
 
-		protected override BaseChatSequence<SpeakerType> SpawnDialogSequence() {
+		protected override BaseChatSequence<SpeakerType, EmotionType> SpawnDialogSequence() {
 			return dialogSequenceSpawner.Spawn();
 		}
 
 		public virtual void RefreshContainer() {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(this.chatBubbleContainerRectTransform);
-        }
+			LayoutRebuilder.ForceRebuildLayoutImmediate(this.chatBubbleContainerRectTransform);
+		}
 
 		protected internal virtual void Clear() {
-			List<HistoryBubbleChat<SpeakerType>> removeList = new List<HistoryBubbleChat<SpeakerType>>();
-            foreach (RectTransform childTransform in this.chatBubbleContainerRectTransform) {
-				HistoryBubbleChat<SpeakerType> child = childTransform.GetComponent<HistoryBubbleChat<SpeakerType>>();
-                if (child != null) {
-                    removeList.Add(child);
-                }
-            }
+			List<HistoryBubbleChat<SpeakerType, EmotionType>> removeList = new List<HistoryBubbleChat<SpeakerType, EmotionType>>();
+			foreach (RectTransform childTransform in this.chatBubbleContainerRectTransform) {
+				HistoryBubbleChat<SpeakerType, EmotionType> child = childTransform.GetComponent<HistoryBubbleChat<SpeakerType, EmotionType>>();
+				if (child != null) {
+					removeList.Add(child);
+				}
+			}
 
 			foreach (var child in removeList) {
-                chatBubbleSpawner.ShouldBeInactive(child);
-            }
-        }
+				chatBubbleSpawner.ShouldBeInactive(child);
+			}
+		}
 
-        protected internal virtual void ShowChat() {
+		protected internal virtual void ShowChat() {
 			this.Clear();
-            this.chatBubbleContainerToHide.gameObject.SetActive(true);
-        }
+			this.chatBubbleContainerToHide.gameObject.SetActive(true);
+		}
 
-        protected internal virtual void HideChat() {
-            this.chatBubbleContainerToHide.gameObject.SetActive(false);
+		protected internal virtual void HideChat() {
+			this.chatBubbleContainerToHide.gameObject.SetActive(false);
 			this.Clear();
-        }
+		}
 
 		public override void StopSequence(SequenceBase sequence, Coroutine coroutine, bool hardStop = false) {
 			base.StopSequence(sequence, coroutine, hardStop);
@@ -91,14 +91,14 @@ namespace jmayberry.TypewriterHelper {
 			if (!this.isOverriding) {
 				this.HideChat();
 			}
-        }
+		}
 
-        protected override void OnSequenceFinished(SequenceBase sequence) {
-            base.OnSequenceFinished(sequence);
+		protected override void OnSequenceFinished(SequenceBase sequence) {
+			base.OnSequenceFinished(sequence);
 
-            if (sequence is HistoryChatSequence<SpeakerType> historySequence) {
-                historySequence.Despawn();
-            }
-        }
-    }
+			if (sequence is HistoryChatSequence<SpeakerType, EmotionType> historySequence) {
+				historySequence.Despawn();
+			}
+		}
+	}
 }

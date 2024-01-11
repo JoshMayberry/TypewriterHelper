@@ -14,28 +14,28 @@ using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using Unity.Plastic.Newtonsoft.Json.Linq;
 
 namespace jmayberry.TypewriterHelper {
-    /**
+	/**
 	 * This kind of chat bubble shows up on the UI inside a layout container.
 	 * When the chat is over, the bubble becomes semi-transparent and does not despawn until the entire sequence is over. 
 	 */
-    [Serializable]
-	public abstract class HistoryBubbleChat<SpeakerType> : BaseChat<SpeakerType> where SpeakerType : Enum {
+	[Serializable]
+	public abstract class HistoryBubbleChat<SpeakerType, EmotionType> : BaseChat<SpeakerType, EmotionType> where SpeakerType : Enum where EmotionType : Enum {
 		[Header("History: Setup")]
-        [Required][SerializeField] protected Image iconImage;
-        [Required][SerializeField] protected Image backgroundImage;
-        [Required][SerializeField] protected RectTransform container;
+		[Required][SerializeField] protected Image iconImage;
+		[Required][SerializeField] protected Image backgroundImage;
+		[Required][SerializeField] protected RectTransform container;
 
 		[Header("History: Tweak")]
 		[SerializeField] protected Vector3 initialContainerScale = new Vector3(1, 1, 1);
 		[SerializeField] protected Vector2 containerPadding = new Vector2(10, 0); // For scrollbars
 
 		[Header("History: Debug")]
-		[Readonly] [SerializeField] protected List<BaseChat<SpeakerType>> subBubbleList;
-		[SerializeField] protected BaseChat<SpeakerType> subBubbleLatest;
-        [Readonly][SerializeField] protected internal HistoryChatBubbleInfo chatBubbleInfo;
+		[Readonly] [SerializeField] protected List<BaseChat<SpeakerType, EmotionType>> subBubbleList;
+		[SerializeField] protected BaseChat<SpeakerType, EmotionType> subBubbleLatest;
+		[Readonly][SerializeField] protected internal HistoryChatBubbleInfo<EmotionType> chatBubbleInfo;
 
-        protected void Awake() {
-			this.subBubbleList = new List<BaseChat<SpeakerType>>();
+		protected void Awake() {
+			this.subBubbleList = new List<BaseChat<SpeakerType, EmotionType>>();
 		}
 
 		protected virtual void Clear() {
@@ -53,103 +53,107 @@ namespace jmayberry.TypewriterHelper {
 
 		public override void OnSpawn(object spawner) {
 			base.OnSpawn(spawner);
-			this.transform.SetParent(HistoryDialogManager<SpeakerType>.instanceHistory.chatBubbleContainer.transform);
+			this.transform.SetParent(HistoryDialogManager<SpeakerType, EmotionType>.instanceHistory.chatBubbleContainer.transform);
 		}
 
 		public override void OnDespawn(object spawner) {
 			base.OnDespawn(spawner);
-			this.transform.SetParent(HistoryDialogManager<SpeakerType>.instanceHistory.transform);
+			this.transform.SetParent(HistoryDialogManager<SpeakerType, EmotionType>.instanceHistory.transform);
 			this.Clear();
-        }
+		}
 
-        protected override void SetChatBubbleInfo(Speaker<SpeakerType> speaker) {
-            var fallbackChatBubbleInfo = HistoryDialogManager<SpeakerType>.instanceHistory.fallbackChatBubbleInfo;
+		protected override void SetChatBubbleInfo(Speaker<SpeakerType, EmotionType> speaker) {
+			var fallbackChatBubbleInfo = HistoryDialogManager<SpeakerType, EmotionType>.instanceHistory.fallbackChatBubbleInfo;
 
-            if (speaker == null) {
-                this.chatBubbleInfo = fallbackChatBubbleInfo;
-            }
-            else {
-                this.chatBubbleInfo = HistoryDialogManager<SpeakerType>.instanceHistory.chatBubbleInfo.GetValueOrDefault(speaker.speakerType, fallbackChatBubbleInfo);
-            }
-        }
+			if (speaker == null) {
+				this.chatBubbleInfo = fallbackChatBubbleInfo;
+			}
+			else {
+				this.chatBubbleInfo = HistoryDialogManager<SpeakerType, EmotionType>.instanceHistory.chatBubbleInfo.GetValueOrDefault(speaker.speakerType, fallbackChatBubbleInfo);
+			}
+		}
 
-        protected override void UpdateContainerSize(Vector2 newSize) {
-            this.container.sizeDelta = newSize;
-            HistoryDialogManager<SpeakerType>.instanceHistory.RefreshContainer();
-        }
+		protected override BaseSpeakerVoice UpdateSpeaker_getSpeakerVoice(Speaker<SpeakerType, EmotionType> newSpeaker) {
+			return this.chatBubbleInfo.speakerVoice.GetValueOrDefault(this.currentEmotion, (newSpeaker.speakerVoice != null ? newSpeaker.speakerVoice : this.chatBubbleInfo.fallbackSpeakerVoice));
+		}
 
-        protected virtual Vector2 GetContainerScale() {
-            return this.container.localScale;
-        }
+		protected override void UpdateContainerSize(Vector2 newSize) {
+			this.container.sizeDelta = newSize;
+			HistoryDialogManager<SpeakerType, EmotionType>.instanceHistory.RefreshContainer();
+		}
 
-        protected override Vector2 GetContainerTargetSize() {
-            Vector2 textSize = this.dialogText.GetRenderedValues(false);
-            Vector2 targetSize = (textSize + this.padding);
-            float availableWidth = HistoryDialogManager<SpeakerType>.instanceHistory.chatBubbleContainerRectTransform.rect.width - this.containerPadding.x;
+		protected virtual Vector2 GetContainerScale() {
+			return this.container.localScale;
+		}
 
-            return new Vector2(availableWidth, Mathf.Max(this.minContainerSize.y, targetSize.y)) / this.GetContainerScale();
-        }
+		protected override Vector2 GetContainerTargetSize() {
+			Vector2 textSize = this.dialogText.GetRenderedValues(false);
+			Vector2 targetSize = (textSize + this.padding);
+			float availableWidth = HistoryDialogManager<SpeakerType, EmotionType>.instanceHistory.chatBubbleContainerRectTransform.rect.width - this.containerPadding.x;
 
-        protected override bool UpdateSprites() {
-            if (this.chatBubbleInfo == null) {
-                Debug.Log("Cannot update icon");
-                return false;
-            }
+			return new Vector2(availableWidth, Mathf.Max(this.minContainerSize.y, targetSize.y)) / this.GetContainerScale();
+		}
 
-            this.iconImage.sprite = this.chatBubbleInfo.iconSprite.GetValueOrDefault(this.currentDialogOption, this.chatBubbleInfo.fallbackIconSprite);
-            this.backgroundImage.sprite = this.chatBubbleInfo.backgroundSprite.GetValueOrDefault(this.currentChatBubbleType, this.chatBubbleInfo.fallbackBackground);
-            return true;
-        }
+		protected override bool UpdateSprites() {
+			if (this.chatBubbleInfo == null) {
+				Debug.Log("Cannot update icon");
+				return false;
+			}
 
-        protected override void SetSpriteActive(bool state) {
-            this.iconImage.gameObject.SetActive(state);
-            this.backgroundImage.gameObject.SetActive(state);
-        }
+			this.iconImage.sprite = this.chatBubbleInfo.iconSprite.GetValueOrDefault(this.currentDialogOption, this.chatBubbleInfo.fallbackIconSprite);
+			this.backgroundImage.sprite = this.chatBubbleInfo.backgroundSprite.GetValueOrDefault(this.currentChatBubbleType, this.chatBubbleInfo.fallbackBackground);
+			return true;
+		}
 
-        protected override Color GetSpriteColor() {
-            return this.backgroundImage.color;
-        }
+		protected override void SetSpriteActive(bool state) {
+			this.iconImage.gameObject.SetActive(state);
+			this.backgroundImage.gameObject.SetActive(state);
+		}
 
-        protected override void SetSpriteColor(Color newColor) {
-            this.iconImage.color = newColor;
-            this.backgroundImage.color = newColor;
-        }
+		protected override Color GetSpriteColor() {
+			return this.backgroundImage.color;
+		}
 
-        protected internal override IEnumerator Populate_PreLoop(DialogContext dialogContext, DialogEntry dialogEntry) {
-            this.container.localScale = initialContainerScale; // Patch for scale changing for some reason
-            yield return base.Populate_PreLoop(dialogContext, dialogEntry);
-        }
+		protected override void SetSpriteColor(Color newColor) {
+			this.iconImage.color = newColor;
+			this.backgroundImage.color = newColor;
+		}
 
-        public override IEnumerator Populate_Loop(DialogContext dialogContext, DialogEntry dialogEntry, string dialog, int i, bool isLastInLoop, bool isLastInSequence) {
-            if (i == 0) {
-                yield return base.Populate_Loop(dialogContext, dialogEntry, dialog, i, isLastInLoop, isLastInSequence);
-                yield break;
-            }
+		protected internal override IEnumerator Populate_PreLoop(DialogContext dialogContext, BaseDialogEntry<EmotionType> BaseDialogEntry) {
+			this.container.localScale = initialContainerScale; // Patch for scale changing for some reason
+			yield return base.Populate_PreLoop(dialogContext, BaseDialogEntry);
+		}
+
+		public override IEnumerator Populate_Loop(DialogContext dialogContext, BaseDialogEntry<EmotionType> BaseDialogEntry, string dialog, int i, bool isLastInLoop, bool isLastInSequence) {
+			if (i == 0) {
+				yield return base.Populate_Loop(dialogContext, BaseDialogEntry, dialog, i, isLastInLoop, isLastInSequence);
+				yield break;
+			}
 
 
-            this.SetOpacity(0.6f);
+			this.SetOpacity(0.6f);
 
-            this.subBubbleLatest = this.spawner.Spawn();
-            this.subBubbleList.Add(this.subBubbleLatest);
+			this.subBubbleLatest = this.spawner.Spawn();
+			this.subBubbleList.Add(this.subBubbleLatest);
 
-            yield return this.subBubbleLatest.Populate_PreLoop(dialogContext, dialogEntry);
-            yield return this.subBubbleLatest.Populate_Loop(dialogContext, dialogEntry, dialog, 0, isLastInLoop, isLastInSequence);
-        }
+			yield return this.subBubbleLatest.Populate_PreLoop(dialogContext, BaseDialogEntry);
+			yield return this.subBubbleLatest.Populate_Loop(dialogContext, BaseDialogEntry, dialog, 0, isLastInLoop, isLastInSequence);
+		}
 
-        public override void SetOpacity(float value) {
-            base.SetOpacity(value);
+		public override void SetOpacity(float value) {
+			base.SetOpacity(value);
 
-            if (this.subBubbleLatest != null) {
-                this.subBubbleLatest.SetOpacity(value);
-            }
-        }
+			if (this.subBubbleLatest != null) {
+				this.subBubbleLatest.SetOpacity(value);
+			}
+		}
 
-        public override void OnSkipToEnd() {
-            base.OnSkipToEnd();
+		public override void OnSkipToEnd() {
+			base.OnSkipToEnd();
 
-            if (this.subBubbleLatest != null) {
-                this.subBubbleLatest.OnSkipToEnd();
-            }
-        }
-    }
+			if (this.subBubbleLatest != null) {
+				this.subBubbleLatest.OnSkipToEnd();
+			}
+		}
+	}
 }

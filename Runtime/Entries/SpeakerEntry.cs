@@ -2,8 +2,8 @@
 using System;
 
 namespace jmayberry.TypewriterHelper.Entries {
-    [Serializable]
-    public class SpeakerEntry : FactEntry {
-        public string DisplayName;
-    }
+	[Serializable]
+	public class SpeakerEntry : FactEntry {
+		public string DisplayName;
+	}
 }

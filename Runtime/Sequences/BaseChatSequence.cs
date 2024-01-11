@@ -15,10 +15,10 @@ using jmayberry.EventSequencer;
 using jmayberry.Spawner;
 
 namespace jmayberry.TypewriterHelper {
-	public abstract class BaseChatSequence<SpeakerType> : SequenceBase where SpeakerType : Enum {
+	public abstract class BaseChatSequence<SpeakerType, EmotionType> : SequenceBase where SpeakerType : Enum where EmotionType : Enum {
 		[Header("Base: Debug")]
 		[Readonly] public EventEntry rootEntry;
-		[Readonly] public BaseChat<SpeakerType> chatBubble;
+		[Readonly] public BaseChat<SpeakerType, EmotionType> chatBubble;
 		[Readonly] public BaseEntry currentEntry;
 		[Readonly] public bool isStarted;
 		[Readonly] public bool isFinished;
@@ -31,7 +31,7 @@ namespace jmayberry.TypewriterHelper {
 
 		public override void OnDespawn(object spawner) {
 			TypewriterDatabase.Instance.RemoveListener(this.HandleTypewriterEvent);
-			BaseDialogManager<SpeakerType>.instance.EventUserInteractedWithDialog.RemoveListener(this.OnUserInteracted);
+			BaseDialogManager<SpeakerType, EmotionType>.instance.EventUserInteractedWithDialog.RemoveListener(this.OnUserInteracted);
 		}
 
 		public virtual void Reset() {
@@ -113,8 +113,8 @@ namespace jmayberry.TypewriterHelper {
 		public abstract IEnumerator Start_Post(DialogContext dialogContext);
 
 		protected virtual IEnumerator HandleCurrentEntry(DialogContext dialogContext, BaseEntry baseEntry) {
-			if (baseEntry is DialogEntry dialogEntry) {
-				yield return this.chatBubble.Populate(dialogContext, dialogEntry);
+			if (baseEntry is BaseDialogEntry<EmotionType> BaseDialogEntry) {
+				yield return this.chatBubble.Populate(dialogContext, BaseDialogEntry);
 			}
 			else {
 				Debug.LogError($"Unknown entry type {baseEntry}");
@@ -134,7 +134,7 @@ namespace jmayberry.TypewriterHelper {
 				BaseEntry entryToCheck = (this.currentEntry != null ? this.currentEntry : this.rootEntry);
 				if (!ruleEntry.Triggers.List.Contains(entryToCheck.ID)) {
 					Debug.LogWarning("A rule that does not belong to this sequence was triggered");
-					BaseDialogManager<SpeakerType>.instance.orphanedEntries.Add(ruleEntry);
+					BaseDialogManager<SpeakerType, EmotionType>.instance.orphanedEntries.Add(ruleEntry);
 					return;
 				}
 
@@ -170,8 +170,8 @@ namespace jmayberry.TypewriterHelper {
 				}
 			}
 
-			if (this.currentEntry is DialogEntry dialogEntry) {
-				return dialogEntry.priority;
+			if (this.currentEntry is BaseDialogEntry<EmotionType> BaseDialogEntry) {
+				return BaseDialogEntry.priority;
 			}
 
 			return EventPriority.None;

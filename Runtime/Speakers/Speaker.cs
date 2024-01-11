@@ -9,11 +9,13 @@ using jmayberry.CustomAttributes;
 using System.Collections.Generic;
 
 namespace jmayberry.TypewriterHelper {
-	public class Speaker<SpeakerType> : MonoBehaviour where SpeakerType : Enum {
+	public class Speaker<SpeakerType, EmotionType> : MonoBehaviour where SpeakerType : Enum where EmotionType : Enum {
 		[Header("Setup")]
 		[Required][SerializeField] internal Transform chatBubblePosition;
 		[Required][SerializeField] internal ChatBubbleAlignment chatBubbleAlignment = ChatBubbleAlignment.TopMiddle;
 		[Required][SerializeField] internal SpeakerType speakerType;
+		[Required][SerializeField] internal EmotionType defaultEmotionType;
+		[Required][SerializeField] internal BaseSpeakerVoice speakerVoice;
 		[SerializeField] internal string displayName;
 		[EntryFilter(Variant = EntryVariant.Fact, AllowEmpty = true)] [SerializeField] private List<EntryReference> speakerReference;
 
@@ -24,7 +26,7 @@ namespace jmayberry.TypewriterHelper {
 				if (reference == 0) {
 					continue;
 				}
-				BaseDialogManager<SpeakerType>.speakerLookup.Add(reference.ID, this);
+				BaseDialogManager<SpeakerType, EmotionType>.speakerLookup.Add(reference.ID, this);
 			}
 		}
 
@@ -33,11 +35,11 @@ namespace jmayberry.TypewriterHelper {
 				if (reference == 0) {
 					continue;
 				}
-				BaseDialogManager<SpeakerType>.speakerLookup.Remove(reference.ID);
+				BaseDialogManager<SpeakerType, EmotionType>.speakerLookup.Remove(reference.ID);
 			}
 		}
 
-		internal bool IsDifferent(Speaker<SpeakerType> newSpeaker) {
+		internal bool IsDifferent(Speaker<SpeakerType, EmotionType> newSpeaker) {
 			if (newSpeaker == null) {
 				return true;
 			}

@@ -401,7 +401,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   testConversation:
-    InternalID: 3866871
+    InternalID: 3866881
 --- !u!1 &804193658
 GameObject:
   m_ObjectHideFlags: 0
@@ -704,6 +704,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1218551382}
   - component: {fileID: 1218551383}
+  - component: {fileID: 1218551384}
   m_Layer: 0
   m_Name: DialogManager
   m_TagString: Untagged
@@ -741,7 +742,7 @@ MonoBehaviour:
   isOverriding: 0
   isSequenceRunning: 0
   fallbackSpeakerReference:
-    InternalID: 3866865
+    InternalID: 3866878
   InteractionCooldown: 0.1
   lastInteractionTime: 0
   UpdatePositionCooldown: 0.01
@@ -759,6 +760,7 @@ MonoBehaviour:
       Value:
         fallbackBackground: {fileID: -1179940737, guid: b07bd21d6148bbe419726ba9f2616174, type: 3}
         fallbackIconSprite: {fileID: -1644235514, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+        fallbackSpeakerVoice: {fileID: 11400000, guid: 916430bf1ae39df43b9c4851f017eb1c, type: 2}
         iconSprite:
           _serializedList:
           - Key: 0
@@ -789,6 +791,8 @@ MonoBehaviour:
             Value: {fileID: -1179940737, guid: b07bd21d6148bbe419726ba9f2616174, type: 3}
           - Key: 3
             Value: {fileID: -1179940737, guid: b07bd21d6148bbe419726ba9f2616174, type: 3}
+        speakerVoice:
+          _serializedList: []
         fallbackPointToSpeakerSprite: {fileID: 1087955862, guid: d8556ebe3301c1842b4da95309d989bc, type: 3}
         pointToSpeakerSprite:
           _serializedList:
@@ -804,6 +808,7 @@ MonoBehaviour:
       Value:
         fallbackBackground: {fileID: -1179940737, guid: b07bd21d6148bbe419726ba9f2616174, type: 3}
         fallbackIconSprite: {fileID: -1644235514, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+        fallbackSpeakerVoice: {fileID: 11400000, guid: 916430bf1ae39df43b9c4851f017eb1c, type: 2}
         iconSprite:
           _serializedList:
           - Key: 0
@@ -834,6 +839,8 @@ MonoBehaviour:
             Value: {fileID: -1179940737, guid: b07bd21d6148bbe419726ba9f2616174, type: 3}
           - Key: 3
             Value: {fileID: -1179940737, guid: b07bd21d6148bbe419726ba9f2616174, type: 3}
+        speakerVoice:
+          _serializedList: []
         fallbackPointToSpeakerSprite: {fileID: 1087955862, guid: d8556ebe3301c1842b4da95309d989bc, type: 3}
         pointToSpeakerSprite:
           _serializedList:
@@ -849,6 +856,7 @@ MonoBehaviour:
       Value:
         fallbackBackground: {fileID: -905072904, guid: b07bd21d6148bbe419726ba9f2616174, type: 3}
         fallbackIconSprite: {fileID: 1857164743, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+        fallbackSpeakerVoice: {fileID: 11400000, guid: 804bf10baa038c241a8aaf73233c4479, type: 2}
         iconSprite:
           _serializedList:
           - Key: 0
@@ -879,6 +887,12 @@ MonoBehaviour:
             Value: {fileID: -905072904, guid: b07bd21d6148bbe419726ba9f2616174, type: 3}
           - Key: 3
             Value: {fileID: -905072904, guid: b07bd21d6148bbe419726ba9f2616174, type: 3}
+        speakerVoice:
+          _serializedList:
+          - Key: 1
+            Value: {fileID: 11400000, guid: 4ae190d1b4e43e0428a6145a00331b8f, type: 2}
+          - Key: 3
+            Value: {fileID: 11400000, guid: 44db9d66787eeb641a3708bbe2960259, type: 2}
         fallbackPointToSpeakerSprite: {fileID: -2035301258, guid: d8556ebe3301c1842b4da95309d989bc, type: 3}
         pointToSpeakerSprite:
           _serializedList:
@@ -894,6 +908,7 @@ MonoBehaviour:
       Value:
         fallbackBackground: {fileID: -1819183423, guid: b07bd21d6148bbe419726ba9f2616174, type: 3}
         fallbackIconSprite: {fileID: -2029955655, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+        fallbackSpeakerVoice: {fileID: 11400000, guid: a9f9b2221a57cd641a1198a18d1c776e, type: 2}
         iconSprite:
           _serializedList:
           - Key: 0
@@ -924,6 +939,8 @@ MonoBehaviour:
             Value: {fileID: -1819183423, guid: b07bd21d6148bbe419726ba9f2616174, type: 3}
           - Key: 3
             Value: {fileID: -1819183423, guid: b07bd21d6148bbe419726ba9f2616174, type: 3}
+        speakerVoice:
+          _serializedList: []
         fallbackPointToSpeakerSprite: {fileID: -1381586864, guid: d8556ebe3301c1842b4da95309d989bc, type: 3}
         pointToSpeakerSprite:
           _serializedList:
@@ -938,6 +955,7 @@ MonoBehaviour:
   fallbackChatBubbleInfo:
     fallbackBackground: {fileID: -1179940737, guid: b07bd21d6148bbe419726ba9f2616174, type: 3}
     fallbackIconSprite: {fileID: -1644235514, guid: f560642493fbe65419ef9c7e5c783de1, type: 3}
+    fallbackSpeakerVoice: {fileID: 11400000, guid: 916430bf1ae39df43b9c4851f017eb1c, type: 2}
     iconSprite:
       _serializedList:
       - Key: 0
@@ -968,6 +986,8 @@ MonoBehaviour:
         Value: {fileID: -1179940737, guid: b07bd21d6148bbe419726ba9f2616174, type: 3}
       - Key: 3
         Value: {fileID: -1179940737, guid: b07bd21d6148bbe419726ba9f2616174, type: 3}
+    speakerVoice:
+      _serializedList: []
     fallbackPointToSpeakerSprite: {fileID: 1087955862, guid: d8556ebe3301c1842b4da95309d989bc, type: 3}
     pointToSpeakerSprite:
       _serializedList:
@@ -979,6 +999,103 @@ MonoBehaviour:
         Value: {fileID: 1087955862, guid: d8556ebe3301c1842b4da95309d989bc, type: 3}
       - Key: 3
         Value: {fileID: 1087955862, guid: d8556ebe3301c1842b4da95309d989bc, type: 3}
+  audioSource: {fileID: 0}
+--- !u!82 &1218551384
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1218551381}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &1235741846
 GameObject:
   m_ObjectHideFlags: 0
@@ -1443,6 +1560,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 7524615529022654808}
   - {fileID: 282084558}
   - {fileID: 1058089060}
   m_Father: {fileID: 0}
@@ -1462,10 +1580,11 @@ MonoBehaviour:
   chatBubblePosition: {fileID: 1058089060}
   chatBubbleAlignment: 1
   speakerType: 2
+  defaultEmotionType: 0
+  speakerVoice: {fileID: 0}
   displayName: Slime Player
   speakerReference:
-  - InternalID: 3866864
-  - InternalID: 3866865
+  - InternalID: 3866879
   speed: 5
 --- !u!1001 &1060958918772318135
 PrefabInstance:
@@ -1525,13 +1644,97 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8259967825773173365, guid: a037e9103cfb6ec49bb311a540bc6ee7, type: 3}
       propertyPath: speakerReference.Array.data[0].InternalID
-      value: 3866870
+      value: 3866880
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a037e9103cfb6ec49bb311a540bc6ee7, type: 3}
+--- !u!114 &3646245206306568520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4682205130734179036}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0e81cd81b1460149aa05716f0af7bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chatBubblePosition: {fileID: 7144507710259982829}
+  chatBubbleAlignment: 1
+  speakerType: 1
+  defaultEmotionType: 0
+  speakerVoice: {fileID: 0}
+  displayName: System
+  speakerReference:
+  - InternalID: 3866878
+--- !u!1 &4682205130734179036
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7524615529022654808}
+  - component: {fileID: 3646245206306568520}
+  m_Layer: 0
+  m_Name: System
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7144507710259982829
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8929271208782108690}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.78, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7524615529022654808}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &7524615529022654808
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4682205130734179036}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.44, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7144507710259982829}
+  m_Father: {fileID: 2002072831}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8929271208782108690
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7144507710259982829}
+  m_Layer: 0
+  m_Name: ChatBubblePosition
+  m_TagString: Untagged
+  m_Icon: {fileID: 1206586993520771344, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

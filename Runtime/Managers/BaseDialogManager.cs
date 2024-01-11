@@ -29,14 +29,16 @@ namespace jmayberry.TypewriterHelper {
 	}
 
 	[Serializable]
-	public class BaseChatBubbleInfo {
+	public class BaseChatBubbleInfo<EmotionType> where EmotionType : Enum {
 		[Required] public Sprite fallbackBackground;
 		[Required] public Sprite fallbackIconSprite;
+		[Required] public BaseSpeakerVoice fallbackSpeakerVoice;
 		[SerializedDictionary("Dialog Option", "Icon")] public SerializedDictionary<DialogOption, Sprite> iconSprite;
 		[SerializedDictionary("Chat Type", "Background")] public SerializedDictionary<ChatBubbleType, Sprite> backgroundSprite;
+		[SerializedDictionary("Emotion", "Speaker Voice")] public SerializedDictionary<EmotionType, BaseSpeakerVoice> speakerVoice;
 	}
 
-	public abstract class BaseDialogManager<SpeakerType> : EventManagerBase where SpeakerType : Enum {
+	public abstract class BaseDialogManager<SpeakerType, EmotionType> : EventManagerBase where SpeakerType : Enum where EmotionType : Enum {
 		[Header("Base: Setup")]
 		[EntryFilter(Variant = EntryVariant.Fact)] public EntryReference fallbackSpeakerReference;
 
@@ -48,21 +50,21 @@ namespace jmayberry.TypewriterHelper {
 
 		[Header("Base: For Debugging")]
 		public static readonly DialogContext defaultContext = new DialogContext();
-		[SerializeField] internal static Dictionary<int, Speaker<SpeakerType>> speakerLookup = new Dictionary<int, Speaker<SpeakerType>>();
+		[SerializeField] internal static Dictionary<int, Speaker<SpeakerType, EmotionType>> speakerLookup = new Dictionary<int, Speaker<SpeakerType, EmotionType>>();
 		[Readonly] public List<BaseEntry> orphanedEntries = new List<BaseEntry>();
 
 		protected TypewriterWatcher typewriterWatcher;
-		protected internal static UnitySpawner<BaseChat<SpeakerType>> chatBubbleSpawner;
+		protected internal static UnitySpawner<BaseChat<SpeakerType, EmotionType>> chatBubbleSpawner;
 
 		[Header("Base: Events")]
 		[Readonly] public UnityEvent EventUserInteractedWithDialog = new UnityEvent();
 		[Readonly] public UnityEvent EventUpdateBubblePosition = new UnityEvent();
 
-		public static BaseDialogManager<SpeakerType> instance { get; private set; }
+		public static BaseDialogManager<SpeakerType, EmotionType> instance { get; private set; }
 
 		protected virtual void Awake() {
 			if (instance != null && instance != this) {
-				Debug.LogError("Found more than one BaseDialogManager<SpeakerType> in the scene.");
+				Debug.LogError("Found more than one BaseDialogManager<SpeakerType, EmotionType> in the scene.");
 				Destroy(this.gameObject);
 				return;
 			}
@@ -78,7 +80,7 @@ namespace jmayberry.TypewriterHelper {
 			TypewriterDatabase.Instance.RemoveListener(this.HandleTypewriterEvent);
 		}
 
-		protected abstract BaseChatSequence<SpeakerType> SpawnDialogSequence();
+		protected abstract BaseChatSequence<SpeakerType, EmotionType> SpawnDialogSequence();
 
 		public int GetFact(ITypewriterContext context, EntryReference factReference) {
 			factReference.TryGetEntry(out FactEntry factEntry);
@@ -103,15 +105,15 @@ namespace jmayberry.TypewriterHelper {
 			}
 		}
 
-		public Speaker<SpeakerType> LookupSpeaker(DialogEntry dialogEntry) {
-			var speaker = speakerLookup.GetValueOrDefault(dialogEntry.Speaker.ID);
+		public Speaker<SpeakerType, EmotionType> LookupSpeaker(BaseDialogEntry<EmotionType> BaseDialogEntry) {
+			var speaker = speakerLookup.GetValueOrDefault(BaseDialogEntry.Speaker.ID);
 			if (speaker == null) {
 				speaker = speakerLookup.GetValueOrDefault(this.fallbackSpeakerReference.ID);
 			}
 			return speaker;
 		}
 
-		public Speaker<SpeakerType> LookupSpeaker(SpeakerEntry speakerEntry) {
+		public Speaker<SpeakerType, EmotionType> LookupSpeaker(SpeakerEntry speakerEntry) {
 			var speaker = speakerLookup.GetValueOrDefault(speakerEntry.ID);
 			if (speaker == null) {
 				speaker = speakerLookup.GetValueOrDefault(this.fallbackSpeakerReference.ID);
@@ -139,13 +141,13 @@ namespace jmayberry.TypewriterHelper {
 				return false;
 			}
 
-			if (this.isSequenceRunning && (this.currentSequence is BaseChatSequence<SpeakerType> currentDialogSequence)) {
+			if (this.isSequenceRunning && (this.currentSequence is BaseChatSequence<SpeakerType, EmotionType> currentDialogSequence)) {
 				if (!currentDialogSequence.ShouldOverride(eventEntry)) {
 					return false;
 				}
 			}
 
-			BaseChatSequence<SpeakerType> dialogSequence = this.SpawnDialogSequence();
+			BaseChatSequence<SpeakerType, EmotionType> dialogSequence = this.SpawnDialogSequence();
 			dialogSequence.rootEntry = eventEntry;
 			dialogSequence.Reset();
 
@@ -192,6 +194,6 @@ namespace jmayberry.TypewriterHelper {
 			}
 			this.lastUpdatePositionTime = Time.time;
 			this.EventUpdateBubblePosition.Invoke();
-        }
-    }
+		}
+	}
 }

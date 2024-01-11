@@ -5,5 +5,15 @@ using UnityEngine;
 using jmayberry.TypewriterHelper;
 
 namespace jmayberry.TypewriterHelper.Samples.ChatBubble {
-	public class ChatBubble : PointerBubbleChat<MySpeakerType> { }
+	public class ChatBubble : PointerBubbleChat<MySpeakerType, MyEmotionType> {
+		protected override void UpdateTextProgress_PlaySound() {
+			if (this.currentVoice == null) {
+				return;
+			}
+
+			if (this.currentVoice is UnitySpeakerVoice unityVoice) {
+				unityVoice.PlaySound(DialogManager.myInstance.audioSource, this.currentTextLength, this.UpdateTextProgress_GetCurrentCharacter());
+			}
+		}
+	}
 }

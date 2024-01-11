@@ -16,22 +16,28 @@ using jmayberry.Spawner;
 using UnityEngine.Events;
 
 namespace jmayberry.TypewriterHelper.Samples.ChatPortrait {
-	public enum MySpeakerType {
-		Unknown,
-		System,
-		Slime,
-		Skeleton,
-	}
+	[RequireComponent(typeof(AudioSource))]
+	public class DialogManager : PortraitDialogManager<MySpeakerType, MyEmotionType> {
+		public AudioSource audioSource;
 
-    public enum MyEmotionType {
-        Normal,
-        Happy,
-        Angry,
-        Sad,
-    }
+		public static DialogManager myInstance { get; private set; }
 
-    public class DialogManager : PortraitDialogManager<MySpeakerType, MyEmotionType> {
-        private void Update() {
+		protected override void Awake() {
+			base.Awake();
+
+			if (myInstance != null && myInstance != this) {
+				Debug.LogError("Found more than one DialogManager in the scene.");
+				Destroy(this.gameObject);
+				return;
+			}
+
+			myInstance = this;
+
+			this.audioSource = GetComponent<AudioSource>();
+
+		}
+
+		private void Update() {
 			if (Input.GetKeyDown("space")) {
 				this.EventUserInteractedWithDialog.Invoke();
 			}

@@ -6,14 +6,27 @@ using jmayberry.Spawner;
 using jmayberry.TypewriterHelper;
 
 namespace jmayberry.TypewriterHelper.Samples.ChatBubble {
-	public enum MySpeakerType {
-		Unknown,
-		System,
-		Slime,
-		Skeleton,
-	}
+	[RequireComponent(typeof(AudioSource))]
+	public class DialogManager : ObjectDialogManager<MySpeakerType, MyEmotionType> {
+		public AudioSource audioSource;
 
-	public class DialogManager : ObjectDialogManager<MySpeakerType> {
+		public static DialogManager myInstance { get; private set; }
+
+		protected override void Awake() {
+			base.Awake();
+
+			if (myInstance != null && myInstance != this) {
+				Debug.LogError("Found more than one DialogManager in the scene.");
+				Destroy(this.gameObject);
+				return;
+			}
+
+			myInstance = this;
+
+			this.audioSource = GetComponent<AudioSource>();
+
+		}
+
 		private void Update() {
 			if (Input.GetKeyDown("space")) {
 				this.EventUserInteractedWithDialog.Invoke();
