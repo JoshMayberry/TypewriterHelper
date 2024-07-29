@@ -17,7 +17,7 @@ using UnityEngine.Events;
 
 namespace jmayberry.TypewriterHelper.Samples.ChatPortrait {
 	[RequireComponent(typeof(AudioSource))]
-	public class DialogManager : PortraitDialogManager<MySpeakerType, MyEmotionType> {
+	public class DialogManager : PortraitDialogManager<MySpeakerType, MyEmotionType, MyActionType> {
 		public AudioSource audioSource;
 
 		public static DialogManager myInstance { get; private set; }

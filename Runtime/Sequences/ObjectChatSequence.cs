@@ -15,12 +15,12 @@ using jmayberry.EventSequencer;
 using jmayberry.Spawner;
 
 namespace jmayberry.TypewriterHelper {
-	public class ObjectChatSequence<SpeakerType, EmotionType> : BaseChatSequence<SpeakerType, EmotionType> where SpeakerType : Enum where EmotionType : Enum {
-		[Readonly][SerializeField] protected CodeSpawner<ObjectChatSequence<SpeakerType, EmotionType>> spawner;
+	public class ObjectChatSequence<SpeakerType, EmotionType, ActionType> : BaseChatSequence<SpeakerType, EmotionType, ActionType> where SpeakerType : Enum where EmotionType : Enum where ActionType : Enum {
+		[Readonly][SerializeField] protected CodeSpawner<ObjectChatSequence<SpeakerType, EmotionType, ActionType>> spawner;
 		public override void OnSpawn(object spawner) {
 			base.OnSpawn(spawner);
 
-			if (spawner is CodeSpawner<ObjectChatSequence<SpeakerType, EmotionType>> sequenceSpawner) {
+			if (spawner is CodeSpawner<ObjectChatSequence<SpeakerType, EmotionType, ActionType>> sequenceSpawner) {
 				this.spawner = sequenceSpawner;
 			}
 			else {
@@ -33,7 +33,7 @@ namespace jmayberry.TypewriterHelper {
 			this.spawner = null;
 
 			if (this.chatBubble != null) {
-				BaseDialogManager<SpeakerType, EmotionType>.instance.StartCoroutine(this.chatBubble.DespawnCoroutine());
+				BaseDialogManager<SpeakerType, EmotionType, ActionType>.instance.StartCoroutine(this.chatBubble.DespawnCoroutine());
 				this.chatBubble = null;
 			}
 		}
@@ -48,8 +48,8 @@ namespace jmayberry.TypewriterHelper {
 		}
 
 		public override IEnumerator Start_Pre(DialogContext dialogContext) {
-			ObjectDialogManager<SpeakerType, EmotionType>.instance.EventUserInteractedWithDialog.AddListener(this.OnUserInteracted);
-			this.chatBubble = ObjectDialogManager<SpeakerType, EmotionType>.chatBubbleSpawner.Spawn();
+			ObjectDialogManager<SpeakerType, EmotionType, ActionType>.instance.EventUserInteractedWithDialog.AddListener(this.OnUserInteracted);
+			this.chatBubble = ObjectDialogManager<SpeakerType, EmotionType, ActionType>.chatBubbleSpawner.Spawn();
 			yield return null;
 		}
 

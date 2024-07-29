@@ -15,10 +15,10 @@ using jmayberry.EventSequencer;
 using jmayberry.Spawner;
 
 namespace jmayberry.TypewriterHelper {
-	public abstract class BaseChatSequence<SpeakerType, EmotionType> : SequenceBase where SpeakerType : Enum where EmotionType : Enum {
+	public abstract class BaseChatSequence<SpeakerType, EmotionType, ActionType> : SequenceBase where SpeakerType : Enum where EmotionType : Enum where ActionType : Enum {
 		[Header("Base: Debug")]
 		[Readonly] public EventEntry rootEntry;
-		[Readonly] public BaseChat<SpeakerType, EmotionType> chatBubble;
+		[Readonly] public BaseChat<SpeakerType, EmotionType, ActionType> chatBubble;
 		[Readonly] public BaseEntry currentEntry;
 		[Readonly] public bool isStarted;
 		[Readonly] public bool isFinished;
@@ -31,7 +31,7 @@ namespace jmayberry.TypewriterHelper {
 
 		public override void OnDespawn(object spawner) {
 			TypewriterDatabase.Instance.RemoveListener(this.HandleTypewriterEvent);
-			BaseDialogManager<SpeakerType, EmotionType>.instance.EventUserInteractedWithDialog.RemoveListener(this.OnUserInteracted);
+			BaseDialogManager<SpeakerType, EmotionType, ActionType>.instance.EventUserInteractedWithDialog.RemoveListener(this.OnUserInteracted);
 		}
 
 		public virtual void Reset() {
@@ -113,8 +113,11 @@ namespace jmayberry.TypewriterHelper {
 		public abstract IEnumerator Start_Post(DialogContext dialogContext);
 
 		protected virtual IEnumerator HandleCurrentEntry(DialogContext dialogContext, BaseEntry baseEntry) {
-			if (baseEntry is BaseDialogEntry<EmotionType> BaseDialogEntry) {
-				yield return this.chatBubble.Populate(dialogContext, BaseDialogEntry);
+			if (baseEntry is BaseDialogEntry<EmotionType> baseDialogEntry) {
+				yield return this.chatBubble.Populate(dialogContext, baseDialogEntry);
+			}
+			else if (baseEntry is BaseActionEntry<ActionType> actionEntry) {
+				yield return actionEntry.DoAction(dialogContext);
 			}
 			else {
 				Debug.LogError($"Unknown entry type {baseEntry}");
@@ -134,7 +137,7 @@ namespace jmayberry.TypewriterHelper {
 				BaseEntry entryToCheck = (this.currentEntry != null ? this.currentEntry : this.rootEntry);
 				if (!ruleEntry.Triggers.List.Contains(entryToCheck.ID)) {
 					Debug.LogWarning("A rule that does not belong to this sequence was triggered");
-					BaseDialogManager<SpeakerType, EmotionType>.instance.orphanedEntries.Add(ruleEntry);
+					BaseDialogManager<SpeakerType, EmotionType, ActionType>.instance.orphanedEntries.Add(ruleEntry);
 					return;
 				}
 
@@ -170,8 +173,12 @@ namespace jmayberry.TypewriterHelper {
 				}
 			}
 
-			if (this.currentEntry is BaseDialogEntry<EmotionType> BaseDialogEntry) {
-				return BaseDialogEntry.priority;
+			if (this.currentEntry is BaseDialogEntry<EmotionType> baseDialogEntry) {
+				return baseDialogEntry.priority;
+			}
+
+			if (this.currentEntry is BaseActionEntry<ActionType> actionEntry) {
+				return actionEntry.priority;
 			}
 
 			return EventPriority.None;

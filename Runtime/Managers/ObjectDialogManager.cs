@@ -22,39 +22,39 @@ namespace jmayberry.TypewriterHelper {
 		[SerializedDictionary("Chat Type", "Pointer")] public SerializedDictionary<ChatBubbleType, Sprite> pointToSpeakerSprite;
 	}
 
-	public class ObjectDialogManager<SpeakerType, EmotionType> : BaseDialogManager<SpeakerType, EmotionType> where SpeakerType : Enum where EmotionType : Enum {
+	public class ObjectDialogManager<SpeakerType, EmotionType, ActionType> : BaseDialogManager<SpeakerType, EmotionType, ActionType> where SpeakerType : Enum where EmotionType : Enum where ActionType : Enum {
 		[Header("Object: Setup")]
-		[Required][SerializeField] protected BaseChat<SpeakerType, EmotionType> chatBubblePrefab;
+		[Required][SerializeField] protected BaseChat<SpeakerType, EmotionType, ActionType> chatBubblePrefab;
 		[SerializedDictionary("Speaker Type", "Chat Bubble")] public SerializedDictionary<SpeakerType, ObjectChatBubbleInfo<EmotionType>> chatBubbleInfo = new SerializedDictionary<SpeakerType, ObjectChatBubbleInfo<EmotionType>>();
 		public ObjectChatBubbleInfo<EmotionType> fallbackChatBubbleInfo;
 
-		protected internal static CodeSpawner<ObjectChatSequence<SpeakerType, EmotionType>> dialogSequenceSpawner;
+		protected internal static CodeSpawner<ObjectChatSequence<SpeakerType, EmotionType, ActionType>> dialogSequenceSpawner;
 
-		public static ObjectDialogManager<SpeakerType, EmotionType> instanceObject { get; private set; }
+		public static ObjectDialogManager<SpeakerType, EmotionType, ActionType> instanceObject { get; private set; }
 
 		protected override void Awake() {
 			base.Awake();
 
 			if (instanceObject != null && instanceObject != this) {
-				Debug.LogError("Found more than one ObjectDialogManager<SpeakerType, EmotionType> in the scene.");
+				Debug.LogError("Found more than one ObjectDialogManager<SpeakerType, EmotionType, ActionType> in the scene.");
 				Destroy(this.gameObject);
 				return;
 			}
 
 			instanceObject = this;
 
-			dialogSequenceSpawner = new CodeSpawner<ObjectChatSequence<SpeakerType, EmotionType>>();
-			chatBubbleSpawner = new UnitySpawner<BaseChat<SpeakerType, EmotionType>>(chatBubblePrefab);
+			dialogSequenceSpawner = new CodeSpawner<ObjectChatSequence<SpeakerType, EmotionType, ActionType>>();
+			chatBubbleSpawner = new UnitySpawner<BaseChat<SpeakerType, EmotionType, ActionType>>(chatBubblePrefab);
 		}
 
-		protected override BaseChatSequence<SpeakerType, EmotionType> SpawnDialogSequence() {
+		protected override BaseChatSequence<SpeakerType, EmotionType, ActionType> SpawnDialogSequence() {
 			return dialogSequenceSpawner.Spawn();
 		}
 
 		protected override void OnSequenceFinished(SequenceBase sequence) {
 			base.OnSequenceFinished(sequence);
 
-			if (sequence is ObjectChatSequence<SpeakerType, EmotionType> objectSequence) {
+			if (sequence is ObjectChatSequence<SpeakerType, EmotionType, ActionType> objectSequence) {
 				objectSequence.Despawn();
 			}
 		}

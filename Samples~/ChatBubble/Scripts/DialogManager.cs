@@ -7,7 +7,7 @@ using jmayberry.TypewriterHelper;
 
 namespace jmayberry.TypewriterHelper.Samples.ChatBubble {
 	[RequireComponent(typeof(AudioSource))]
-	public class DialogManager : ObjectDialogManager<MySpeakerType, MyEmotionType> {
+	public class DialogManager : ObjectDialogManager<MySpeakerType, MyEmotionType, MyActionType> {
 		public AudioSource audioSource;
 
 		public static DialogManager myInstance { get; private set; }

@@ -17,7 +17,7 @@ using UnityEngine.Events;
 
 namespace jmayberry.TypewriterHelper.Samples.ChatHistory {
 	[RequireComponent(typeof(AudioSource))]
-	public class DialogManager : HistoryDialogManager<MySpeakerType, MyEmotionType> {
+	public class DialogManager : HistoryDialogManager<MySpeakerType, MyEmotionType, MyActionType> {
 		public AudioSource audioSource;
 
 		public static DialogManager myInstance { get; private set; }

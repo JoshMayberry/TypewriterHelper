@@ -23,33 +23,33 @@ namespace jmayberry.TypewriterHelper {
 		[SerializedDictionary("Emotion Type", "Portrait")] public SerializedDictionary<EmotionType, Sprite> portraitSprite;
 	}
 
-	public class PortraitDialogManager<SpeakerType, EmotionType> : BaseDialogManager<SpeakerType, EmotionType> where SpeakerType : Enum where EmotionType : Enum {
+	public class PortraitDialogManager<SpeakerType, EmotionType, ActionType> : BaseDialogManager<SpeakerType, EmotionType, ActionType> where SpeakerType : Enum where EmotionType : Enum where ActionType : Enum {
 		[Header("Portrait: Setup")]
-		[Required][SerializeField] public PortraitChat<SpeakerType, EmotionType> chatWindow;
+		[Required][SerializeField] public PortraitChat<SpeakerType, EmotionType, ActionType> chatWindow;
 		[SerializedDictionary("Speaker Type", "Chat Bubble")] public SerializedDictionary<SpeakerType, PortraitChatBubbleInfo<EmotionType>> chatBubbleInfo = new SerializedDictionary<SpeakerType, PortraitChatBubbleInfo<EmotionType>>();
 		public PortraitChatBubbleInfo<EmotionType> fallbackChatBubbleInfo;
 
-		protected internal static CodeSpawner<PortraitChatSequence<SpeakerType, EmotionType>> dialogSequenceSpawner;
+		protected internal static CodeSpawner<PortraitChatSequence<SpeakerType, EmotionType, ActionType>> dialogSequenceSpawner;
 
-		public static PortraitDialogManager<SpeakerType, EmotionType> instancePortrait { get; private set; }
+		public static PortraitDialogManager<SpeakerType, EmotionType, ActionType> instancePortrait { get; private set; }
 
 		protected override void Awake() {
 			base.Awake();
 
 			if (instancePortrait != null && instancePortrait != this) {
-				Debug.LogError("Found more than one PortraitDialogManager<SpeakerType, EmotionType> in the scene.");
+				Debug.LogError("Found more than one PortraitDialogManager<SpeakerType, EmotionType, ActionType> in the scene.");
 				Destroy(this.gameObject);
 				return;
 			}
 
 			instancePortrait = this;
 
-			dialogSequenceSpawner = new CodeSpawner<PortraitChatSequence<SpeakerType, EmotionType>>();
+			dialogSequenceSpawner = new CodeSpawner<PortraitChatSequence<SpeakerType, EmotionType, ActionType>>();
 
 			this.chatWindow.DoHide();
 		}
 
-		protected override BaseChatSequence<SpeakerType, EmotionType> SpawnDialogSequence() {
+		protected override BaseChatSequence<SpeakerType, EmotionType, ActionType> SpawnDialogSequence() {
 			var sequence = dialogSequenceSpawner.Spawn();
 			sequence.chatBubble = this.chatWindow;
 			return sequence;
@@ -66,7 +66,7 @@ namespace jmayberry.TypewriterHelper {
 		protected override void OnSequenceFinished(SequenceBase sequence) {
 			base.OnSequenceFinished(sequence);
 
-			if (sequence is PortraitChatSequence<SpeakerType, EmotionType> portraitSequence) {
+			if (sequence is PortraitChatSequence<SpeakerType, EmotionType, ActionType> portraitSequence) {
 				portraitSequence.Despawn();
 			}
 		}

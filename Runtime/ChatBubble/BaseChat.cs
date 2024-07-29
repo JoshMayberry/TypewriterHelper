@@ -18,7 +18,7 @@ namespace jmayberry.TypewriterHelper {
 	}
 
 	[Serializable]
-	public abstract class BaseChat<SpeakerType, EmotionType> : MonoBehaviour, ISpawnable where SpeakerType : Enum where EmotionType : Enum {
+	public abstract class BaseChat<SpeakerType, EmotionType, ActionType> : MonoBehaviour, ISpawnable where SpeakerType : Enum where EmotionType : Enum where ActionType : Enum {
 		[Header("Object: Setup")]
 		[Required][SerializeField] protected TMP_Text dialogText;
 		[Required][SerializeField] protected TMP_Text speakerText;
@@ -36,14 +36,14 @@ namespace jmayberry.TypewriterHelper {
 		[Readonly][SerializeField] protected string currentText;
 		[Readonly][SerializeField] protected internal int currentTextLength;
 		[Readonly][SerializeField] protected internal float currentProgress;
-		[Readonly][SerializeField] protected internal Speaker<SpeakerType, EmotionType> currentSpeaker;
+		[Readonly][SerializeField] protected internal Speaker<SpeakerType, EmotionType, ActionType> currentSpeaker;
 		[Readonly][SerializeField] protected internal BaseDialogEntry<EmotionType> currentEntry;
 		[Readonly][SerializeField] protected internal EmotionType currentEmotion;
 		[Readonly][SerializeField] protected internal DialogContext currentContext;
 		[Readonly][SerializeField] protected internal BaseSpeakerVoice currentVoice;
 		[Readonly][SerializeField] protected DialogOption currentDialogOption;
 		[Readonly][SerializeField] protected ChatBubbleType currentChatBubbleType;
-		[Readonly][SerializeField] protected UnitySpawner<BaseChat<SpeakerType, EmotionType>> spawner;
+		[Readonly][SerializeField] protected UnitySpawner<BaseChat<SpeakerType, EmotionType, ActionType>> spawner;
 
 		public virtual void SoftReset(Transform newPosition = null) {
 			if (newPosition != null) {
@@ -65,7 +65,7 @@ namespace jmayberry.TypewriterHelper {
 		}
 
 		public virtual void OnSpawn(object spawner) {
-			if (spawner is UnitySpawner<BaseChat<SpeakerType, EmotionType>> sequenceSpawner) {
+			if (spawner is UnitySpawner<BaseChat<SpeakerType, EmotionType, ActionType>> sequenceSpawner) {
 				this.spawner = sequenceSpawner;
 			}
 			else {
@@ -89,7 +89,7 @@ namespace jmayberry.TypewriterHelper {
 		}
 
 		protected virtual bool UpdateSpeaker() {
-			Speaker<SpeakerType, EmotionType> newSpeaker = BaseDialogManager<SpeakerType, EmotionType>.instance.LookupSpeaker(this.currentEntry);
+			Speaker<SpeakerType, EmotionType, ActionType> newSpeaker = BaseDialogManager<SpeakerType, EmotionType, ActionType>.instance.LookupSpeaker(this.currentEntry);
 			if (newSpeaker == null) {
 				Debug.LogError($"Cannot find speaker in scene; {this.currentEntry.Speaker.DisplayName}");
 				return false;
@@ -98,7 +98,7 @@ namespace jmayberry.TypewriterHelper {
 			return UpdateSpeaker(newSpeaker);
 		}
 
-		protected virtual bool UpdateSpeaker(Speaker<SpeakerType, EmotionType> newSpeaker) {
+		protected virtual bool UpdateSpeaker(Speaker<SpeakerType, EmotionType, ActionType> newSpeaker) {
 			if (newSpeaker == null) {
 				Debug.LogError($"No speaker given");
 				return false;
@@ -118,8 +118,7 @@ namespace jmayberry.TypewriterHelper {
 			return true;
 		}
 
-
-		protected virtual string UpdateSpeaker_getSpeakerName(Speaker<SpeakerType, EmotionType> newSpeaker) {
+		protected virtual string UpdateSpeaker_getSpeakerName(Speaker<SpeakerType, EmotionType, ActionType> newSpeaker) {
 			if ((this.currentEntry != null) && !string.IsNullOrEmpty(this.currentEntry.Speaker.DisplayName)) {
 				return this.currentEntry.Speaker.DisplayName;
 			}
@@ -127,7 +126,7 @@ namespace jmayberry.TypewriterHelper {
 			return this.fallbackSpeakerName;
 		}
 
-		protected virtual bool UpdateSpeaker_updateChatBubbleInfo(Speaker<SpeakerType, EmotionType> newSpeaker) {
+		protected virtual bool UpdateSpeaker_updateChatBubbleInfo(Speaker<SpeakerType, EmotionType, ActionType> newSpeaker) {
 			if ((newSpeaker == null) || !newSpeaker.IsDifferent(this.currentSpeaker)) {
 				return this.UpdateSpeaker_noNewSpeaker();
 			}
@@ -140,9 +139,9 @@ namespace jmayberry.TypewriterHelper {
 			return true;
 		}
 
-		protected abstract BaseSpeakerVoice UpdateSpeaker_getSpeakerVoice(Speaker<SpeakerType, EmotionType> newSpeaker);
+		protected abstract BaseSpeakerVoice UpdateSpeaker_getSpeakerVoice(Speaker<SpeakerType, EmotionType, ActionType> newSpeaker);
 
-		protected abstract void SetChatBubbleInfo(Speaker<SpeakerType, EmotionType> speaker);
+		protected abstract void SetChatBubbleInfo(Speaker<SpeakerType, EmotionType, ActionType> speaker);
 
 		protected virtual bool UpdateSprites(DialogOption newOption) {
 			this.currentDialogOption = newOption;

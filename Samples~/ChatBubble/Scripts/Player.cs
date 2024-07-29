@@ -2,7 +2,7 @@ using jmayberry.TypewriterHelper;
 using UnityEngine;
 
 namespace jmayberry.TypewriterHelper.Samples.ChatBubble {
-	public class Player : Speaker<MySpeakerType, MyEmotionType> {
+	public class Player : Speaker<MySpeakerType, MyEmotionType, MyActionType> {
 		public float speed = 5.0f;
 
 		void Update() {

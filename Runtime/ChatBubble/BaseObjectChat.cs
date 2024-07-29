@@ -25,7 +25,7 @@ namespace jmayberry.TypewriterHelper {
 	 * When the chat is over, the bubble despawns.
 	 */
 	[Serializable]
-	public abstract class BaseObjectChat<SpeakerType, EmotionType> : BaseChat<SpeakerType, EmotionType> where SpeakerType : Enum where EmotionType : Enum {
+	public abstract class BaseObjectChat<SpeakerType, EmotionType, ActionType> : BaseChat<SpeakerType, EmotionType, ActionType> where SpeakerType : Enum where EmotionType : Enum where ActionType : Enum {
 		[Header("Object: Setup")]
 		[Required][SerializeField] protected SpriteRenderer iconSpriteRenderer;
 		[Required][SerializeField] protected SpriteRenderer backgroundSpriteRenderer;
@@ -50,21 +50,21 @@ namespace jmayberry.TypewriterHelper {
 
 		public override void OnSpawn(object spawner) {
 			base.OnSpawn(spawner);
-			BaseDialogManager<SpeakerType, EmotionType>.instance.EventUpdateBubblePosition.AddListener(this.UpdatePosition);
+			BaseDialogManager<SpeakerType, EmotionType, ActionType>.instance.EventUpdateBubblePosition.AddListener(this.UpdatePosition);
 		}
 
 		public override void OnDespawn(object spawner) {
 			base.OnDespawn(spawner);
-			BaseDialogManager<SpeakerType, EmotionType>.instance.EventUpdateBubblePosition.RemoveListener(this.UpdatePosition);
+			BaseDialogManager<SpeakerType, EmotionType, ActionType>.instance.EventUpdateBubblePosition.RemoveListener(this.UpdatePosition);
 		}
 
-		protected override void SetChatBubbleInfo(Speaker<SpeakerType, EmotionType> speaker) {
-			var fallbackChatBubbleInfo = ObjectDialogManager<SpeakerType, EmotionType>.instanceObject.fallbackChatBubbleInfo;
+		protected override void SetChatBubbleInfo(Speaker<SpeakerType, EmotionType, ActionType> speaker) {
+			var fallbackChatBubbleInfo = ObjectDialogManager<SpeakerType, EmotionType, ActionType>.instanceObject.fallbackChatBubbleInfo;
 
 			if (speaker == null) {
 				this.chatBubbleInfo = fallbackChatBubbleInfo;
 			} else {
-				this.chatBubbleInfo = ObjectDialogManager<SpeakerType, EmotionType>.instanceObject.chatBubbleInfo.GetValueOrDefault(speaker.speakerType, fallbackChatBubbleInfo);
+				this.chatBubbleInfo = ObjectDialogManager<SpeakerType, EmotionType, ActionType>.instanceObject.chatBubbleInfo.GetValueOrDefault(speaker.speakerType, fallbackChatBubbleInfo);
 			}
 		}
 
@@ -81,7 +81,7 @@ namespace jmayberry.TypewriterHelper {
 			return this.backgroundSpriteRenderer.transform.localScale;
 		}
 
-		protected override BaseSpeakerVoice UpdateSpeaker_getSpeakerVoice(Speaker<SpeakerType, EmotionType> newSpeaker) {
+		protected override BaseSpeakerVoice UpdateSpeaker_getSpeakerVoice(Speaker<SpeakerType, EmotionType, ActionType> newSpeaker) {
 			return this.chatBubbleInfo.speakerVoice.GetValueOrDefault(this.currentEmotion, (newSpeaker.speakerVoice != null ? newSpeaker.speakerVoice : this.chatBubbleInfo.fallbackSpeakerVoice));
 		}
 

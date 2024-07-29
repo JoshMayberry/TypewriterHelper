@@ -5,7 +5,7 @@ using UnityEngine;
 using jmayberry.TypewriterHelper;
 
 namespace jmayberry.TypewriterHelper.Samples.ChatPortrait {
-	public class ChatBubble : PortraitChat<MySpeakerType, MyEmotionType> {
+	public class ChatBubble : PortraitChat<MySpeakerType, MyEmotionType, MyActionType> {
 		protected override void UpdateTextProgress_PlaySound() {
 			if (this.currentVoice == null) {
 				return;

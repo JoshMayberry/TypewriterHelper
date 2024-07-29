@@ -5,7 +5,7 @@ using UnityEngine;
 using jmayberry.TypewriterHelper;
 
 namespace jmayberry.TypewriterHelper.Samples.ChatHistory {
-	public class ChatBubble : HistoryBubbleChat<MySpeakerType, MyEmotionType> {
+	public class ChatBubble : HistoryBubbleChat<MySpeakerType, MyEmotionType, MyActionType> {
 		protected override void UpdateTextProgress_PlaySound() {
 			if (this.currentVoice == null) {
 				return;

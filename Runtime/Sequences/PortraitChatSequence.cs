@@ -15,13 +15,13 @@ using jmayberry.EventSequencer;
 using jmayberry.Spawner;
 
 namespace jmayberry.TypewriterHelper {
-	public class PortraitChatSequence<SpeakerType, EmotionType> : BaseChatSequence<SpeakerType, EmotionType> where SpeakerType : Enum where EmotionType : Enum {
-		[Readonly][SerializeField] protected CodeSpawner<PortraitChatSequence<SpeakerType, EmotionType>> spawner;
+	public class PortraitChatSequence<SpeakerType, EmotionType, ActionType> : BaseChatSequence<SpeakerType, EmotionType, ActionType> where SpeakerType : Enum where EmotionType : Enum where ActionType : Enum {
+		[Readonly][SerializeField] protected CodeSpawner<PortraitChatSequence<SpeakerType, EmotionType, ActionType>> spawner;
 
 		public override void OnSpawn(object spawner) {
 			base.OnSpawn(spawner);
 
-			if (spawner is CodeSpawner<PortraitChatSequence<SpeakerType, EmotionType>> sequenceSpawner) {
+			if (spawner is CodeSpawner<PortraitChatSequence<SpeakerType, EmotionType, ActionType>> sequenceSpawner) {
 				this.spawner = sequenceSpawner;
 			}
 			else {
@@ -45,13 +45,13 @@ namespace jmayberry.TypewriterHelper {
 
 		public override IEnumerator Start_Pre(DialogContext dialogContext) {
 			this.chatBubble.SoftReset();
-			PortraitDialogManager<SpeakerType, EmotionType>.instance.EventUserInteractedWithDialog.AddListener(this.OnUserInteracted);
-			PortraitDialogManager<SpeakerType, EmotionType>.instancePortrait.ShowChat();
+			PortraitDialogManager<SpeakerType, EmotionType, ActionType>.instance.EventUserInteractedWithDialog.AddListener(this.OnUserInteracted);
+			PortraitDialogManager<SpeakerType, EmotionType, ActionType>.instancePortrait.ShowChat();
 			yield return null;
 		}
 
 		public override IEnumerator Start_Post(DialogContext dialogContext) {
-			PortraitDialogManager<SpeakerType, EmotionType>.instancePortrait.HideChat();
+			PortraitDialogManager<SpeakerType, EmotionType, ActionType>.instancePortrait.HideChat();
 			yield return null;
 		}
 

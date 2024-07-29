@@ -21,7 +21,7 @@ namespace jmayberry.TypewriterHelper {
 	 * It is not spawned in or despawned.
 	 */
 	[Serializable]
-	public abstract class PortraitChat<SpeakerType, EmotionType> : BaseChat<SpeakerType, EmotionType> where SpeakerType : Enum where EmotionType : Enum {
+	public abstract class PortraitChat<SpeakerType, EmotionType, ActionType> : BaseChat<SpeakerType, EmotionType, ActionType> where SpeakerType : Enum where EmotionType : Enum where ActionType : Enum {
 		[Header("Portrait: Setup")]
 		[Required][SerializeField] protected Image iconImage;
 		[Required][SerializeField] protected Image backgroundImage;
@@ -69,7 +69,7 @@ namespace jmayberry.TypewriterHelper {
 			this.currentSide = newSide;
 		}
 
-		protected override BaseSpeakerVoice UpdateSpeaker_getSpeakerVoice(Speaker<SpeakerType, EmotionType> newSpeaker) {
+		protected override BaseSpeakerVoice UpdateSpeaker_getSpeakerVoice(Speaker<SpeakerType, EmotionType, ActionType> newSpeaker) {
 			return this.chatBubbleInfo.speakerVoice.GetValueOrDefault(this.currentEmotion, (newSpeaker.speakerVoice != null ? newSpeaker.speakerVoice : this.chatBubbleInfo.fallbackSpeakerVoice));
 		}
 
@@ -77,14 +77,14 @@ namespace jmayberry.TypewriterHelper {
 			return this.UpdateSprites_Portrait(); // Account for same speaker but different emotion
 		}
 
-		protected override void SetChatBubbleInfo(Speaker<SpeakerType, EmotionType> speaker) {
-			var fallbackChatBubbleInfo = PortraitDialogManager<SpeakerType, EmotionType>.instancePortrait.fallbackChatBubbleInfo;
+		protected override void SetChatBubbleInfo(Speaker<SpeakerType, EmotionType, ActionType> speaker) {
+			var fallbackChatBubbleInfo = PortraitDialogManager<SpeakerType, EmotionType, ActionType>.instancePortrait.fallbackChatBubbleInfo;
 
 			if (speaker == null) {
 				this.chatBubbleInfo = fallbackChatBubbleInfo;
 			}
 			else {
-				this.chatBubbleInfo = PortraitDialogManager<SpeakerType, EmotionType>.instancePortrait.chatBubbleInfo.GetValueOrDefault(speaker.speakerType, fallbackChatBubbleInfo);
+				this.chatBubbleInfo = PortraitDialogManager<SpeakerType, EmotionType, ActionType>.instancePortrait.chatBubbleInfo.GetValueOrDefault(speaker.speakerType, fallbackChatBubbleInfo);
 			}
 		}
 

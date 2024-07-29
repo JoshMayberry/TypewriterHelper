@@ -19,7 +19,7 @@ namespace jmayberry.TypewriterHelper {
 	 * When the chat is over, the bubble becomes semi-transparent and does not despawn until the entire sequence is over. 
 	 */
 	[Serializable]
-	public abstract class HistoryBubbleChat<SpeakerType, EmotionType> : BaseChat<SpeakerType, EmotionType> where SpeakerType : Enum where EmotionType : Enum {
+	public abstract class HistoryBubbleChat<SpeakerType, EmotionType, ActionType> : BaseChat<SpeakerType, EmotionType, ActionType> where SpeakerType : Enum where EmotionType : Enum where ActionType : Enum {
 		[Header("History: Setup")]
 		[Required][SerializeField] protected Image iconImage;
 		[Required][SerializeField] protected Image backgroundImage;
@@ -30,12 +30,12 @@ namespace jmayberry.TypewriterHelper {
 		[SerializeField] protected Vector2 containerPadding = new Vector2(10, 0); // For scrollbars
 
 		[Header("History: Debug")]
-		[Readonly] [SerializeField] protected List<BaseChat<SpeakerType, EmotionType>> subBubbleList;
-		[SerializeField] protected BaseChat<SpeakerType, EmotionType> subBubbleLatest;
+		[Readonly] [SerializeField] protected List<BaseChat<SpeakerType, EmotionType, ActionType>> subBubbleList;
+		[SerializeField] protected BaseChat<SpeakerType, EmotionType, ActionType> subBubbleLatest;
 		[Readonly][SerializeField] protected internal HistoryChatBubbleInfo<EmotionType> chatBubbleInfo;
 
 		protected void Awake() {
-			this.subBubbleList = new List<BaseChat<SpeakerType, EmotionType>>();
+			this.subBubbleList = new List<BaseChat<SpeakerType, EmotionType, ActionType>>();
 		}
 
 		protected virtual void Clear() {
@@ -53,33 +53,33 @@ namespace jmayberry.TypewriterHelper {
 
 		public override void OnSpawn(object spawner) {
 			base.OnSpawn(spawner);
-			this.transform.SetParent(HistoryDialogManager<SpeakerType, EmotionType>.instanceHistory.chatBubbleContainer.transform);
+			this.transform.SetParent(HistoryDialogManager<SpeakerType, EmotionType, ActionType>.instanceHistory.chatBubbleContainer.transform);
 		}
 
 		public override void OnDespawn(object spawner) {
 			base.OnDespawn(spawner);
-			this.transform.SetParent(HistoryDialogManager<SpeakerType, EmotionType>.instanceHistory.transform);
+			this.transform.SetParent(HistoryDialogManager<SpeakerType, EmotionType, ActionType>.instanceHistory.transform);
 			this.Clear();
 		}
 
-		protected override void SetChatBubbleInfo(Speaker<SpeakerType, EmotionType> speaker) {
-			var fallbackChatBubbleInfo = HistoryDialogManager<SpeakerType, EmotionType>.instanceHistory.fallbackChatBubbleInfo;
+		protected override void SetChatBubbleInfo(Speaker<SpeakerType, EmotionType, ActionType> speaker) {
+			var fallbackChatBubbleInfo = HistoryDialogManager<SpeakerType, EmotionType, ActionType>.instanceHistory.fallbackChatBubbleInfo;
 
 			if (speaker == null) {
 				this.chatBubbleInfo = fallbackChatBubbleInfo;
 			}
 			else {
-				this.chatBubbleInfo = HistoryDialogManager<SpeakerType, EmotionType>.instanceHistory.chatBubbleInfo.GetValueOrDefault(speaker.speakerType, fallbackChatBubbleInfo);
+				this.chatBubbleInfo = HistoryDialogManager<SpeakerType, EmotionType, ActionType>.instanceHistory.chatBubbleInfo.GetValueOrDefault(speaker.speakerType, fallbackChatBubbleInfo);
 			}
 		}
 
-		protected override BaseSpeakerVoice UpdateSpeaker_getSpeakerVoice(Speaker<SpeakerType, EmotionType> newSpeaker) {
+		protected override BaseSpeakerVoice UpdateSpeaker_getSpeakerVoice(Speaker<SpeakerType, EmotionType, ActionType> newSpeaker) {
 			return this.chatBubbleInfo.speakerVoice.GetValueOrDefault(this.currentEmotion, (newSpeaker.speakerVoice != null ? newSpeaker.speakerVoice : this.chatBubbleInfo.fallbackSpeakerVoice));
 		}
 
 		protected override void UpdateContainerSize(Vector2 newSize) {
 			this.container.sizeDelta = newSize;
-			HistoryDialogManager<SpeakerType, EmotionType>.instanceHistory.RefreshContainer();
+			HistoryDialogManager<SpeakerType, EmotionType, ActionType>.instanceHistory.RefreshContainer();
 		}
 
 		protected virtual Vector2 GetContainerScale() {
@@ -89,7 +89,7 @@ namespace jmayberry.TypewriterHelper {
 		protected override Vector2 GetContainerTargetSize() {
 			Vector2 textSize = this.dialogText.GetRenderedValues(false);
 			Vector2 targetSize = (textSize + this.padding);
-			float availableWidth = HistoryDialogManager<SpeakerType, EmotionType>.instanceHistory.chatBubbleContainerRectTransform.rect.width - this.containerPadding.x;
+			float availableWidth = HistoryDialogManager<SpeakerType, EmotionType, ActionType>.instanceHistory.chatBubbleContainerRectTransform.rect.width - this.containerPadding.x;
 
 			return new Vector2(availableWidth, Mathf.Max(this.minContainerSize.y, targetSize.y)) / this.GetContainerScale();
 		}
